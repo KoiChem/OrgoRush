@@ -204,6 +204,20 @@
       .choice.wrong{border-color:var(--bad); background:var(--bad-bg);}
       .choice.wrong .mark{color:var(--bad);}
       .choice.dim{opacity:.55;}
+      /* Dark mode: structure line art is black on transparent, so any
+         surface holding a structure image keeps its light "paper"
+         background in dark mode too (the same pattern as --tile, which
+         never darkens). Text-only choices and cards stay dark. */
+      @media (prefers-color-scheme: dark){
+        .choice:has(img){background:var(--tile);}
+        .choice.right:has(img){background:#F9ECCB; border-color:#B97F06;}
+        .choice.wrong:has(img){background:#FAE3E0; border-color:#B93A32;}
+        .choice.right:has(img) .mark{color:#7C5600;}
+        .choice.wrong:has(img) .mark{color:#B93A32;}
+        .p-card.struct.pairA{background:#F9ECCB;}
+        .p-card.struct.pairB{background:#F4E5E8;}
+        .p-card.struct.pendB{background:#F8ECEE;}
+      }
       /* T1 correct-answer bounce: transform only, layout never moves */
       .choice.pop{animation:choicePop .38s ease;}
       @keyframes choicePop{0%{transform:scale(1)}35%{transform:scale(1.08); box-shadow:0 0 0 3px rgba(223,163,46,.55), 0 4px 16px rgba(185,127,6,.35);}70%{transform:scale(.99)}100%{transform:scale(1)}}
@@ -552,7 +566,7 @@
       .p-dot{position:absolute; top:7px; left:7px; width:12px; height:12px; border-radius:50%; z-index:2;}
       .p-dot.dotA{background:var(--pair1-dot);}
       .p-dot.dotB{background:var(--pair2-dot);}
-      .p-name-txt{font-size:clamp(15px, 4.4vw, 20px); font-weight:800; line-height:1.25; white-space:nowrap; pointer-events:none;}
+      .p-name-txt{display:block; max-width:100%; font-size:clamp(15px, 4.4vw, 20px); font-weight:800; line-height:1.25; white-space:nowrap; pointer-events:none;}
       .p-confirm{
         flex:none; width:66px; border-radius:14px;
         background:var(--accent); color:var(--accent-ink); font-size:17px; font-weight:800; box-shadow:var(--shadow);
@@ -1463,6 +1477,34 @@ function startSession(revengeTarget) {
   show("scr-quiz");
   renderQuestion();
 }
+/* Shrink-to-fit for single-line compound names. The quiz prompt name
+   (.q-name, word-break:keep-all) and the pairing name cards (.p-name-txt,
+   nowrap) never wrap by design, so a long name such as
+   ベンゼンスルホン酸ナトリウム used to clip at the screen edge. Instead
+   of cutting characters off, reduce the font size just enough to fit. */
+function fitOneLine(el, floor) {
+  if (!el || !el.parentElement) return;
+  el.style.fontSize = "";
+  /* The name elements are flex items that grow with their content, so
+     their own clientWidth is the full text width even when they spill
+     past the screen. Measure against the parent's inner width instead. */
+  const parent = el.parentElement;
+  const pcs = getComputedStyle(parent);
+  const limit = parent.clientWidth
+    - (parseFloat(pcs.paddingLeft) || 0) - (parseFloat(pcs.paddingRight) || 0)
+    - (parseFloat(pcs.borderLeftWidth) || 0) - (parseFloat(pcs.borderRightWidth) || 0);
+  if (!limit) return;
+  let size = parseFloat(getComputedStyle(el).fontSize) || 16;
+  const min = floor || 11;
+  while (size > min && el.scrollWidth > limit + 1) {
+    size -= 1;
+    el.style.fontSize = size + "px";
+  }
+}
+window.addEventListener("resize", () => {
+  document.querySelectorAll(".q-name").forEach(el => fitOneLine(el, 16));
+  document.querySelectorAll(".p-name-txt").forEach(el => fitOneLine(el, 11));
+});
 function renderQuestion() {
   cleanupQuizFx();
   answered = false;
@@ -1505,6 +1547,7 @@ function renderQuestion() {
     b.addEventListener("click", () => answer(b, c, q));
     box.appendChild(b);
   });
+  fitOneLine(main.querySelector(".q-name"), 16);
 }
 function formulaHtml(f) {
   return f.replace(/(\d+)/g, "<sub>$1</sub>");
@@ -2577,6 +2620,7 @@ function pairRenderQ() {
     b.addEventListener("click", () => pairPick("n", id));
     gn.appendChild(b);
   });
+  gn.querySelectorAll(".p-name-txt").forEach(sp => fitOneLine(sp, 11));
   const miss = pairQ.phase === "miss";
   const cf = $("#pq-confirm");
   cf.style.display = miss ? "none" : "";
