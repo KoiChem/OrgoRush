@@ -41,6 +41,25 @@
           --story-bg:#3D2A1C; --story-line:#8A5A3C;
           --shadow:0 2px 10px rgba(0,0,0,.35);
         }
+        /* Dark-mode structure readability: the diagrams are black line
+           art, so every surface that CARRIES a structure stays on the
+           light paper color even in dark mode — the four-choice /
+           versus structure cards, and the pairing structure cards in
+           their selected / pair states. Name buttons, text and the
+           page background keep the dark palette. (--tile, .q-struct,
+           .d-struct, .z-card .tile, .fb-vs .tile and .p-cmp-frame
+           already use the light --tile in both schemes.) */
+        .choice:has(img), .choice.struct-choice{background:var(--tile); color:#221608;}
+        .choice.right:has(img), .choice.right.struct-choice{background:#F9ECCB;}
+        .choice.wrong:has(img), .choice.wrong.struct-choice{background:#FAE3E0;}
+        .p-card.struct.sel{background:#FBEED3;}
+        .p-card.struct.pairA{background:#F9ECCB;}
+        .p-card.struct.pairB{background:#F4E5E8;}
+        .p-card.struct.pendB{background:#F8ECEE;}
+        /* pairing NAME cards keep the dark palette, so the pair-A name
+           (dark sepia text tuned for the light tint) switches to the
+           light ink color on the dark pair-A background */
+        .p-card.name.pairA{color:var(--ink);}
       }
       *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
       html,body{height:100%;}
@@ -171,7 +190,15 @@
          painted the direction label over the progress bar and slid the
          hint chip under the choices card in mobile Safari). */
       .q-main{flex:1 1 auto; min-height:0; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:4px 0;}
-      .q-name{font-size:30px; font-weight:800; text-align:center; line-height:1.3; word-break:keep-all; min-height:0; flex:0 1 auto; overflow:hidden;}
+      /* Long compound names (up to 17 chars, e.g. ベンゼンスルホン酸
+         ナトリウム / 1,1,2,2-テトラブロモエタン) must never be clipped:
+         fitOneLine() (JS) shrinks the name until it fits on one line
+         (floor 16px), the size also scales with the viewport width,
+         CJK text is allowed to break between characters (the old
+         word-break:keep-all + overflow:hidden cut both ends off), and
+         anything that still does not fit at the floor size wraps onto
+         a second line instead of spilling. */
+      .q-name{font-size:clamp(19px, 6.4vw, 30px); font-weight:800; text-align:center; line-height:1.3; word-break:normal; overflow-wrap:anywhere; text-wrap:balance; min-height:0; flex:0 1 auto; width:100%; max-width:100%;}
       .q-formula{font-size:16px; color:var(--sub); font-weight:700; flex:none;}
       .q-struct{
         background:var(--tile); border:2px solid var(--line); border-radius:16px;
@@ -195,7 +222,10 @@
       .choice{
         background:var(--card); border:2px solid var(--line); border-radius:16px; box-shadow:var(--shadow);
         display:flex; align-items:center; justify-content:center; padding:8px; position:relative;
-        font-size:17px; font-weight:800; line-height:1.3; text-align:center; min-height:0; overflow:hidden;
+        /* text choices carry compound names: scale down a step and let
+           long names wrap inside the card instead of being clipped */
+        font-size:clamp(13.5px, 4.1vw, 17px); font-weight:800; line-height:1.3; text-align:center; min-height:0; overflow:hidden;
+        word-break:normal; overflow-wrap:anywhere;
       }
       .choice img{max-width:92%; max-height:92%; object-fit:contain; pointer-events:none;}
       .choice .mark{position:absolute; top:6px; right:9px; font-size:17px; font-weight:900;}
@@ -204,20 +234,6 @@
       .choice.wrong{border-color:var(--bad); background:var(--bad-bg);}
       .choice.wrong .mark{color:var(--bad);}
       .choice.dim{opacity:.55;}
-      /* Dark mode: structure line art is black on transparent, so any
-         surface holding a structure image keeps its light "paper"
-         background in dark mode too (the same pattern as --tile, which
-         never darkens). Text-only choices and cards stay dark. */
-      @media (prefers-color-scheme: dark){
-        .choice:has(img){background:var(--tile);}
-        .choice.right:has(img){background:#F9ECCB; border-color:#B97F06;}
-        .choice.wrong:has(img){background:#FAE3E0; border-color:#B93A32;}
-        .choice.right:has(img) .mark{color:#7C5600;}
-        .choice.wrong:has(img) .mark{color:#B93A32;}
-        .p-card.struct.pairA{background:#F9ECCB;}
-        .p-card.struct.pairB{background:#F4E5E8;}
-        .p-card.struct.pendB{background:#F8ECEE;}
-      }
       /* T1 correct-answer bounce: transform only, layout never moves */
       .choice.pop{animation:choicePop .38s ease;}
       @keyframes choicePop{0%{transform:scale(1)}35%{transform:scale(1.08); box-shadow:0 0 0 3px rgba(223,163,46,.55), 0 4px 16px rgba(185,127,6,.35);}70%{transform:scale(.99)}100%{transform:scale(1)}}
@@ -299,7 +315,7 @@
       .fb-vs figure{margin:0; flex:1; text-align:center;}
       .fb-vs .tile{background:var(--tile); border:1.5px solid var(--line); border-radius:10px; height:46px; display:flex; align-items:center; justify-content:center; padding:4px;}
       .fb-vs img{max-width:100%; max-height:100%; object-fit:contain;}
-      .fb-vs figcaption{font-size:11.5px; font-weight:700; margin-top:2px;}
+      .fb-vs figcaption{font-size:11.5px; font-weight:700; margin-top:2px; word-break:normal; overflow-wrap:anywhere;}
       .fb-rival{margin-top:4px; font-weight:600;}
       .fb-rival b{color:var(--accent);}
 
@@ -410,7 +426,7 @@
         .screen{padding-top:8px; padding-bottom:calc(8px + env(safe-area-inset-bottom));}
         .q-head{height:40px;}
         .q-main{gap:5px; padding:2px 0;}
-        .q-name{font-size:26px;}
+        .q-name{font-size:clamp(18px, 5.8vw, 26px);}
         .q-struct{height:min(17dvh,120px); padding:6px;}
         .q-choices{height:min(23dvh,175px); gap:6px;}
         .q-feedback{height:200px; margin-top:6px; font-size:13.5px;}
@@ -452,7 +468,7 @@
       .z-card{background:var(--card); border:2px solid var(--line); border-radius:14px; padding:8px 8px 9px; text-align:left; display:flex; flex-direction:column; gap:4px; min-height:152px; position:relative; overflow:hidden;}
       .z-card .tile{background:var(--tile); border:1.5px solid var(--line); border-radius:10px; height:52px; flex:none; display:flex; align-items:center; justify-content:center; padding:4px;}
       .z-card .tile img{max-width:100%; max-height:100%; object-fit:contain;}
-      .z-name{font-weight:800; font-size:14.5px; line-height:1.25;}
+      .z-name{font-weight:800; font-size:14.5px; line-height:1.25; word-break:normal; overflow-wrap:anywhere;}
       .z-formula{font-size:12.5px; color:var(--sub); font-weight:700;}
       .z-chips{display:flex; flex-wrap:wrap; gap:4px; margin-top:auto; flex:none; width:100%; min-height:21px; align-items:center; position:relative; z-index:2; padding-top:3px;}
       .z-chip{font-size:11px; font-weight:800; border-radius:999px; padding:2px 7px; background:var(--chip); color:var(--sub); flex:none; white-space:nowrap; line-height:1.5;}
@@ -473,7 +489,7 @@
       .d-main{flex:1 1 auto; min-height:0; overflow-y:auto; padding:4px 0 10px;}
       .d-struct{background:var(--tile); border:2px solid var(--line); border-radius:16px; height:200px; display:flex; align-items:center; justify-content:center; padding:14px; margin-bottom:10px;}
       .d-struct img{max-width:100%; max-height:100%; object-fit:contain;}
-      .d-name{font-size:26px; font-weight:900; line-height:1.3;}
+      .d-name{font-size:clamp(20px, 6vw, 26px); font-weight:900; line-height:1.3; word-break:normal; overflow-wrap:anywhere;}
       .d-meta{font-size:14px; color:var(--sub); font-weight:700; line-height:1.7;}
       .d-props{background:var(--card); border:2px solid var(--line); border-radius:14px; padding:12px 14px; font-size:15.5px; line-height:1.7; font-weight:600; margin-top:8px;}
       /* ---------- RESULTS ---------- */
@@ -566,7 +582,7 @@
       .p-dot{position:absolute; top:7px; left:7px; width:12px; height:12px; border-radius:50%; z-index:2;}
       .p-dot.dotA{background:var(--pair1-dot);}
       .p-dot.dotB{background:var(--pair2-dot);}
-      .p-name-txt{display:block; max-width:100%; font-size:clamp(15px, 4.4vw, 20px); font-weight:800; line-height:1.25; white-space:nowrap; pointer-events:none;}
+      .p-name-txt{font-size:clamp(13.5px, 4vw, 19px); font-weight:800; line-height:1.22; white-space:normal; word-break:normal; overflow-wrap:anywhere; text-align:center; pointer-events:none; width:100%;}
       .p-confirm{
         flex:none; width:66px; border-radius:14px;
         background:var(--accent); color:var(--accent-ink); font-size:17px; font-weight:800; box-shadow:var(--shadow);
@@ -598,7 +614,7 @@
       .p-fit.mid{height:var(--pairH);} .p-fit.mid img{max-height:var(--pairH);}
       .p-fit.base{height:var(--cmpH);} .p-fit.base img{max-height:var(--cmpH);}
       .p-pair-name{display:flex; align-items:baseline; justify-content:center; gap:7px; flex-wrap:wrap; text-align:center; margin-top:2px;}
-      .p-pair-name .nm{font-size:clamp(19px, 5.6vw, 25px); font-weight:900; line-height:1.2; color:#4A2E08;}
+      .p-pair-name .nm{font-size:clamp(17px, 5.2vw, 25px); font-weight:900; line-height:1.2; color:#4A2E08; word-break:normal; overflow-wrap:anywhere;}
       .p-pair-name .fm{font-size:13.5px; font-weight:700; color:#8A6A2A;}
       /* two-pair compact pair cards: one wrapper = one celebration event */
       .p-pairs-wrap{flex:none; position:relative; display:flex; flex-direction:column; gap:6px; border-radius:16px;}
@@ -638,7 +654,7 @@
       .p-cmp-title::before{content:""; width:8px; height:8px; border-radius:3px; background:var(--accent); flex:none;}
       .p-cmp-frames{display:flex; gap:14px; align-items:stretch;}
       .p-cmp-frame{flex:1; min-width:0; display:flex; flex-direction:column; background:var(--tile); border:2px solid var(--line); border-radius:12px; padding:7px 6px 6px; color:#221608;}
-      .p-cmp-frame .cn{margin-top:5px; font-size:13.5px; font-weight:800; text-align:center; line-height:1.2;}
+      .p-cmp-frame .cn{margin-top:5px; font-size:13.5px; font-weight:800; text-align:center; line-height:1.2; word-break:normal; overflow-wrap:anywhere;}
       .p-fb .boost{margin-top:0;}
       /* pairing BOOST entrance: same language as the quiz feedback —
          fade/rise once per render; reduced motion keeps a gentle fade */
@@ -1477,28 +1493,24 @@ function startSession(revengeTarget) {
   show("scr-quiz");
   renderQuestion();
 }
-/* Shrink-to-fit for single-line compound names. The quiz prompt name
-   (.q-name, word-break:keep-all) and the pairing name cards (.p-name-txt,
-   nowrap) never wrap by design, so a long name such as
-   ベンゼンスルホン酸ナトリウム used to clip at the screen edge. Instead
-   of cutting characters off, reduce the font size just enough to fit. */
-function fitOneLine(el, floor) {
-  if (!el || !el.parentElement) return;
+/* fitOneLine: shrink an element's font size until its text fits on a
+   single line, down to minPx. If it still does not fit at minPx, the
+   inline nowrap is removed so the stylesheet's wrapping takes over —
+   the text wraps instead of ever being clipped. No-ops while the
+   element is not laid out (hidden screen), where the CSS wrapping
+   fallback already prevents clipping. */
+function fitOneLine(el, minPx) {
+  if (!el || !el.clientWidth) return;
   el.style.fontSize = "";
-  /* The name elements are flex items that grow with their content, so
-     their own clientWidth is the full text width even when they spill
-     past the screen. Measure against the parent's inner width instead. */
-  const parent = el.parentElement;
-  const pcs = getComputedStyle(parent);
-  const limit = parent.clientWidth
-    - (parseFloat(pcs.paddingLeft) || 0) - (parseFloat(pcs.paddingRight) || 0)
-    - (parseFloat(pcs.borderLeftWidth) || 0) - (parseFloat(pcs.borderRightWidth) || 0);
-  if (!limit) return;
-  let size = parseFloat(getComputedStyle(el).fontSize) || 16;
-  const min = floor || 11;
-  while (size > min && el.scrollWidth > limit + 1) {
+  el.style.whiteSpace = "nowrap";
+  let size = parseFloat(getComputedStyle(el).fontSize) || minPx;
+  while (size > minPx && el.scrollWidth > el.clientWidth + 1) {
     size -= 1;
     el.style.fontSize = size + "px";
+  }
+  if (el.scrollWidth > el.clientWidth + 1) {
+    el.style.fontSize = minPx + "px";
+    el.style.whiteSpace = "";
   }
 }
 window.addEventListener("resize", () => {
@@ -1531,6 +1543,7 @@ function renderQuestion() {
   } else {
     main.innerHTML = '<div class="q-props">' + q.target.properties + '</div>';
   }
+  fitOneLine(main.querySelector(".q-name"), 16);
   const box = $("#q-choices");
   box.className = "q-choices " + (q.choices.length <= 2 ? "c2" : "c4");
   box.innerHTML = "";
@@ -1538,6 +1551,7 @@ function renderQuestion() {
     const b = document.createElement("button");
     b.type = "button"; b.className = "choice"; b.dataset.id = c.id;
     if (q.dir === "A" || q.dir === "D") {
+      b.classList.add("struct-choice");
       b.setAttribute("aria-label", "構造式の選択肢 " + (i + 1));
       b.innerHTML = structImg(c) + '<span class="mark"></span>';
     } else {
@@ -1547,7 +1561,6 @@ function renderQuestion() {
     b.addEventListener("click", () => answer(b, c, q));
     box.appendChild(b);
   });
-  fitOneLine(main.querySelector(".q-name"), 16);
 }
 function formulaHtml(f) {
   return f.replace(/(\d+)/g, "<sub>$1</sub>");
@@ -2378,7 +2391,7 @@ $("#z-back").addEventListener("click", () => { show("scr-home"); refreshReviewBa
 $("#d-back").addEventListener("click", () => { renderZukan(); show("scr-zukan"); });
 
 window.__orgo = { DATA, byId, BOOST_NOTES, boostNote, boostHtml, boostLockedHtml, STORIES, storyNote, storyHtml, storyLockedHtml, ALLOW_UNAPPROVED_QUESTIONS, needsReviewIds, recOf, ensureRec, saveStore, recordAnswer, startSession, targetWeight, weightedPick, buildSession, mondayKey, todayLocal, refreshWeekly, stateChips, get session() { return session; }, get home() { return home; }, get store() { return store; }, get sessionNewEver() { return sessionNewEver; }, get sessionNewMastered() { return sessionNewMastered; }, get lastResult() { return lastResult; }, chooseDistractors, rangePool, renderZukan, eligibleC, showHomeNotice, refreshDirAvailability, refreshReviewBadge, UNITS, unitPoolIds, zukanPool, fgCountNow, pickFg, get zukan() { return zukan; } };
-const PAIR_BANK = [{"id":"pair-t1","category":"aliphatic","targetId":"acetone","structureDecoyIds":["acetaldehyde","acetic-acid","propane"],"nameDecoyIds":["formaldehyde","formic-acid","1-propanol"],"keyComparison":{"structureId":"acetaldehyde","nameId":"formaldehyde"}},{"id":"pair-t2","category":"aromatic","targetId":"toluene","structureDecoyIds":["benzene","ethylbenzene","phenol"],"nameDecoyIds":["o-xylene","cumene","benzyl-alcohol"],"keyComparison":{"structureId":"phenol","nameId":"benzyl-alcohol"}},{"id":"pair-t3","category":"aliphatic","targetId":"dimethyl-ether","structureDecoyIds":["methanol","1-propanol","acetone"],"nameDecoyIds":["ethanol","2-propanol","propionaldehyde"],"keyComparison":{"structureId":"1-propanol","nameId":"2-propanol"}},{"id":"pair-t4","category":"aliphatic","targetId":"1-butene","structureDecoyIds":["cis-2-butene","2-butyne","2-methylpropene"],"nameDecoyIds":["trans-2-butene","1-butyne","2-methylpropane"],"keyComparison":{"structureId":"cis-2-butene","nameId":"trans-2-butene"}},{"id":"pair-t5","category":"aromatic","targetId":"benzoic-acid","structureDecoyIds":["benzaldehyde","phenol","salicylic-acid"],"nameDecoyIds":["benzyl-alcohol","aniline","aspirin"],"keyComparison":{"structureId":"salicylic-acid","nameId":"aspirin"}},{"id":"pair-t6","category":"aliphatic","targetId":"ethyl-acetate","structureDecoyIds":["methyl-acetate","methyl-formate","acetic-anhydride"],"nameDecoyIds":["vinyl-acetate","formic-acid","acetic-acid"],"keyComparison":{"structureId":"acetic-anhydride","nameId":"acetic-acid"}},{"id":"pair-t7","category":"aliphatic","targetId":"2-butanol","structureDecoyIds":["1-butanol","2-methyl-2-propanol","ethylene-glycol"],"nameDecoyIds":["2-propanol","2-methylpropane","glycerol"],"keyComparison":{"structureId":"ethylene-glycol","nameId":"glycerol"}},{"id":"pair-t8","category":"aliphatic","targetId":"2-methylbutane","structureDecoyIds":["pentane","23-dimethylbutane","cyclopentane"],"nameDecoyIds":["hexane","2-methylpropane","cyclohexane"],"keyComparison":{"structureId":"cyclopentane","nameId":"cyclohexane"}},{"id":"pair-t9","category":"aromatic","targetId":"chlorobenzene","structureDecoyIds":["nitrobenzene","o-dichlorobenzene","phenol"],"nameDecoyIds":["o-nitrotoluene","p-dichlorobenzene","aniline"],"keyComparison":{"structureId":"o-dichlorobenzene","nameId":"p-dichlorobenzene"}},{"id":"pair-t10","category":"aromatic","targetId":"m-xylene","structureDecoyIds":["o-xylene","p-xylene","ethylbenzene"],"nameDecoyIds":["o-nitrotoluene","p-cresol","cumene"],"keyComparison":{"structureId":"p-xylene","nameId":"p-cresol"}},{"id":"pair-t11","category":"aromatic","targetId":"benzaldehyde","structureDecoyIds":["benzoic-acid","benzyl-alcohol","phenyl-acetate"],"nameDecoyIds":["salicylic-acid","phenol","aspirin"],"keyComparison":{"structureId":"benzoic-acid","nameId":"salicylic-acid"}},{"id":"pair-t12","category":"aromatic","targetId":"terephthalic-acid","structureDecoyIds":["phthalic-acid","isophthalic-acid","salicylic-acid"],"nameDecoyIds":["phthalic-anhydride","benzoic-acid","methyl-salicylate"],"keyComparison":{"structureId":"phthalic-acid","nameId":"phthalic-anhydride"}},{"id":"pair-t13","category":"aliphatic","targetId":"diethyl-ether","structureDecoyIds":["dimethyl-ether","methanol","1-propanol"],"nameDecoyIds":["ethanol","1-butanol","2-propanol"],"keyComparison":{"structureId":"dimethyl-ether","nameId":"ethanol"}},{"id":"pair-t14","category":"aliphatic","targetId":"propionaldehyde","structureDecoyIds":["acetaldehyde","acetone","formaldehyde"],"nameDecoyIds":["acetic-acid","2-propanol","formic-acid"],"keyComparison":{"structureId":"acetaldehyde","nameId":"acetic-acid"}},{"id":"pair-t15","category":"aliphatic","targetId":"methyl-ethyl-ketone","structureDecoyIds":["acetone","2-butanol","propionaldehyde"],"nameDecoyIds":["2-propanol","1-butanol","propionic-acid"],"keyComparison":{"structureId":"2-butanol","nameId":"1-butanol"}},{"id":"pair-t16","category":"aliphatic","targetId":"methyl-acetate","structureDecoyIds":["methyl-formate","acetic-acid","ethyl-acetate"],"nameDecoyIds":["formic-acid","acetic-anhydride","ethanol"],"keyComparison":{"structureId":"methyl-formate","nameId":"formic-acid"}},{"id":"pair-t17","category":"aliphatic","targetId":"lactic-acid","structureDecoyIds":["propionic-acid","oxalic-acid","ethylene-glycol"],"nameDecoyIds":["butyric-acid","formic-acid","glycerol"],"keyComparison":{"structureId":"ethylene-glycol","nameId":"glycerol"}},{"id":"pair-t18","category":"aliphatic","targetId":"cis-2-butene","structureDecoyIds":["trans-2-butene","1-butyne","cyclobutane"],"nameDecoyIds":["1-butene","2-butyne","cyclopropane"],"keyComparison":{"structureId":"1-butyne","nameId":"2-butyne"}},{"id":"pair-t19","category":"aromatic","targetId":"phenol","structureDecoyIds":["o-cresol","aniline","benzyl-alcohol"],"nameDecoyIds":["p-cresol","acetanilide","benzaldehyde"],"keyComparison":{"structureId":"o-cresol","nameId":"p-cresol"}},{"id":"pair-t20","category":"aromatic","targetId":"aniline","structureDecoyIds":["phenol","acetanilide","o-nitrotoluene"],"nameDecoyIds":["benzyl-alcohol","phenyl-acetate","p-nitrotoluene"],"keyComparison":{"structureId":"o-nitrotoluene","nameId":"p-nitrotoluene"}},{"id":"pair-t21","category":"aromatic","targetId":"salicylic-acid","structureDecoyIds":["aspirin","benzaldehyde","o-cresol"],"nameDecoyIds":["phenyl-acetate","benzyl-alcohol","p-cresol"],"keyComparison":{"structureId":"aspirin","nameId":"phenyl-acetate"}},{"id":"pair-t22","category":"aromatic","targetId":"styrene","structureDecoyIds":["ethylbenzene","o-xylene","nitrobenzene"],"nameDecoyIds":["cumene","p-xylene","o-nitrotoluene"],"keyComparison":{"structureId":"o-xylene","nameId":"p-xylene"}},{"id":"pair-t23","category":"aromatic","targetId":"phthalic-acid","structureDecoyIds":["isophthalic-acid","benzoic-acid","o-cresol"],"nameDecoyIds":["terephthalic-acid","salicylic-acid","p-cresol"],"keyComparison":{"structureId":"isophthalic-acid","nameId":"terephthalic-acid"}}];
+const PAIR_BANK = [{"id":"pair-t1","category":"aliphatic","targetId":"acetone","structureDecoyIds":["acetaldehyde","acetic-acid","propane"],"nameDecoyIds":["formaldehyde","formic-acid","1-propanol"],"keyComparison":{"structureId":"acetaldehyde","nameId":"formaldehyde"}},{"id":"pair-t2","category":"aromatic","targetId":"toluene","structureDecoyIds":["benzene","ethylbenzene","phenol"],"nameDecoyIds":["o-xylene","cumene","benzyl-alcohol"],"keyComparison":{"structureId":"phenol","nameId":"benzyl-alcohol"}},{"id":"pair-t3","category":"aliphatic","targetId":"dimethyl-ether","structureDecoyIds":["methanol","1-propanol","acetone"],"nameDecoyIds":["ethanol","2-propanol","propionaldehyde"],"keyComparison":{"structureId":"1-propanol","nameId":"2-propanol"}},{"id":"pair-t4","category":"aliphatic","targetId":"1-butene","structureDecoyIds":["cis-2-butene","2-butyne","2-methylpropene"],"nameDecoyIds":["trans-2-butene","1-butyne","2-methylpropane"],"keyComparison":{"structureId":"cis-2-butene","nameId":"trans-2-butene"}},{"id":"pair-t5","category":"aromatic","targetId":"benzoic-acid","structureDecoyIds":["benzaldehyde","phenol","salicylic-acid"],"nameDecoyIds":["benzyl-alcohol","aniline","aspirin"],"keyComparison":{"structureId":"salicylic-acid","nameId":"aspirin"}},{"id":"pair-t6","category":"aliphatic","targetId":"ethyl-acetate","structureDecoyIds":["methyl-acetate","methyl-formate","acetic-anhydride"],"nameDecoyIds":["vinyl-acetate","formic-acid","acetic-acid"],"keyComparison":{"structureId":"acetic-anhydride","nameId":"acetic-acid"}},{"id":"pair-t7","category":"aliphatic","targetId":"2-butanol","structureDecoyIds":["1-butanol","2-methyl-2-propanol","ethylene-glycol"],"nameDecoyIds":["2-propanol","2-methylpropane","glycerol"],"keyComparison":{"structureId":"ethylene-glycol","nameId":"glycerol"}},{"id":"pair-t8","category":"aliphatic","targetId":"2-methylbutane","structureDecoyIds":["pentane","23-dimethylbutane","cyclopentane"],"nameDecoyIds":["hexane","2-methylpropane","cyclohexane"],"keyComparison":{"structureId":"cyclopentane","nameId":"cyclohexane"}},{"id":"pair-t9","category":"aromatic","targetId":"chlorobenzene","structureDecoyIds":["nitrobenzene","o-dichlorobenzene","phenol"],"nameDecoyIds":["o-nitrotoluene","p-dichlorobenzene","aniline"],"keyComparison":{"structureId":"o-dichlorobenzene","nameId":"p-dichlorobenzene"}},{"id":"pair-t10","category":"aromatic","targetId":"m-xylene","structureDecoyIds":["o-xylene","p-xylene","ethylbenzene"],"nameDecoyIds":["o-nitrotoluene","p-cresol","cumene"],"keyComparison":{"structureId":"p-xylene","nameId":"p-cresol"}},{"id":"pair-t11","category":"aromatic","targetId":"benzaldehyde","structureDecoyIds":["benzoic-acid","benzyl-alcohol","phenyl-acetate"],"nameDecoyIds":["salicylic-acid","phenol","aspirin"],"keyComparison":{"structureId":"benzoic-acid","nameId":"salicylic-acid"}},{"id":"pair-t12","category":"aromatic","targetId":"terephthalic-acid","structureDecoyIds":["phthalic-acid","isophthalic-acid","salicylic-acid"],"nameDecoyIds":["phthalic-anhydride","benzoic-acid","methyl-salicylate"],"keyComparison":{"structureId":"phthalic-acid","nameId":"phthalic-anhydride"}},{"id":"pair-t13","category":"aliphatic","targetId":"diethyl-ether","structureDecoyIds":["dimethyl-ether","methanol","1-propanol"],"nameDecoyIds":["ethanol","1-butanol","2-propanol"],"keyComparison":{"structureId":"dimethyl-ether","nameId":"ethanol"}},{"id":"pair-t14","category":"aliphatic","targetId":"propionaldehyde","structureDecoyIds":["acetaldehyde","acetone","formaldehyde"],"nameDecoyIds":["acetic-acid","2-propanol","formic-acid"],"keyComparison":{"structureId":"acetaldehyde","nameId":"acetic-acid"}},{"id":"pair-t15","category":"aliphatic","targetId":"methyl-ethyl-ketone","structureDecoyIds":["acetone","2-butanol","propionaldehyde"],"nameDecoyIds":["2-propanol","1-butanol","propionic-acid"],"keyComparison":{"structureId":"2-butanol","nameId":"1-butanol"}},{"id":"pair-t16","category":"aliphatic","targetId":"methyl-acetate","structureDecoyIds":["methyl-formate","acetic-acid","ethyl-acetate"],"nameDecoyIds":["formic-acid","acetic-anhydride","ethanol"],"keyComparison":{"structureId":"methyl-formate","nameId":"formic-acid"}},{"id":"pair-t17","category":"aliphatic","targetId":"lactic-acid","structureDecoyIds":["propionic-acid","oxalic-acid","ethylene-glycol"],"nameDecoyIds":["butyric-acid","formic-acid","glycerol"],"keyComparison":{"structureId":"ethylene-glycol","nameId":"glycerol"}},{"id":"pair-t18","category":"aliphatic","targetId":"cis-2-butene","structureDecoyIds":["trans-2-butene","1-butyne","cyclobutane"],"nameDecoyIds":["1-butene","2-butyne","cyclopropane"],"keyComparison":{"structureId":"1-butyne","nameId":"2-butyne"}},{"id":"pair-t19","category":"aromatic","targetId":"phenol","structureDecoyIds":["o-cresol","aniline","benzyl-alcohol"],"nameDecoyIds":["p-cresol","acetanilide","benzaldehyde"],"keyComparison":{"structureId":"o-cresol","nameId":"p-cresol"}},{"id":"pair-t20","category":"aromatic","targetId":"aniline","structureDecoyIds":["phenol","acetanilide","o-nitrotoluene"],"nameDecoyIds":["benzyl-alcohol","phenyl-acetate","p-nitrotoluene"],"keyComparison":{"structureId":"o-nitrotoluene","nameId":"p-nitrotoluene"}},{"id":"pair-t21","category":"aromatic","targetId":"salicylic-acid","structureDecoyIds":["aspirin","benzaldehyde","o-cresol"],"nameDecoyIds":["phenyl-acetate","benzyl-alcohol","p-cresol"],"keyComparison":{"structureId":"aspirin","nameId":"phenyl-acetate"}},{"id":"pair-t22","category":"aromatic","targetId":"styrene","structureDecoyIds":["ethylbenzene","o-xylene","nitrobenzene"],"nameDecoyIds":["cumene","p-xylene","o-nitrotoluene"],"keyComparison":{"structureId":"o-xylene","nameId":"p-xylene"}},{"id":"pair-t23","category":"aromatic","targetId":"phthalic-acid","structureDecoyIds":["isophthalic-acid","benzoic-acid","o-cresol"],"nameDecoyIds":["terephthalic-acid","salicylic-acid","p-cresol"],"keyComparison":{"structureId":"isophthalic-acid","nameId":"terephthalic-acid"}},{"id":"pair-t24","category":"aliphatic","targetId":"formaldehyde","structureDecoyIds":["acetaldehyde","formic-acid","methanol"],"nameDecoyIds":["propionaldehyde","acetic-acid","ethanol"],"keyComparison":{"structureId":"acetaldehyde","nameId":"propionaldehyde"}},{"id":"pair-t25","category":"aliphatic","targetId":"ethylene-glycol","structureDecoyIds":["ethanol","1-propanol","methanol"],"nameDecoyIds":["glycerol","2-propanol","1-butanol"],"keyComparison":{"structureId":"1-propanol","nameId":"1-butanol"}},{"id":"pair-t26","category":"aliphatic","targetId":"fumaric-acid","structureDecoyIds":["maleic-acid","butyric-acid","acetic-acid"],"nameDecoyIds":["formic-acid","lactic-acid","oxalic-acid"],"keyComparison":{"structureId":"maleic-acid","nameId":"oxalic-acid"}},{"id":"pair-t27","category":"aliphatic","targetId":"cyclohexane","structureDecoyIds":["cyclohexene","hexane","2-methylbutane"],"nameDecoyIds":["cyclopentene","23-dimethylbutane","cyclopentane"],"keyComparison":{"structureId":"hexane","nameId":"23-dimethylbutane"}},{"id":"pair-t28","category":"aliphatic","targetId":"acetylene","structureDecoyIds":["ethylene","vinyl-chloride","1-butene"],"nameDecoyIds":["2-methylpropene","cis-2-butene","propyne"],"keyComparison":{"structureId":"1-butene","nameId":"cis-2-butene"}},{"id":"pair-t29","category":"aliphatic","targetId":"iodoform","structureDecoyIds":["acetone","ethanol","trichloromethane"],"nameDecoyIds":["acetaldehyde","2-propanol","tetrachloromethane"],"keyComparison":{"structureId":"acetone","nameId":"acetaldehyde"}},{"id":"pair-t30","category":"aliphatic","targetId":"2-methylpropane","structureDecoyIds":["butane","2-methylbutane","pentane"],"nameDecoyIds":["2-butanol","2-methyl-2-propanol","2-methylpropene"],"keyComparison":{"structureId":"2-methylbutane","nameId":"2-methylpropene"}},{"id":"pair-t31","category":"aromatic","targetId":"benzene","structureDecoyIds":["toluene","chlorobenzene","phenol"],"nameDecoyIds":["ethylbenzene","styrene","benzyl-alcohol"],"keyComparison":{"structureId":"toluene","nameId":"ethylbenzene"}},{"id":"pair-t32","category":"aromatic","targetId":"naphthalene","structureDecoyIds":["1-naphthol","2-naphthol","benzene"],"nameDecoyIds":["phenol","o-cresol","cumene"],"keyComparison":{"structureId":"1-naphthol","nameId":"phenol"}},{"id":"pair-t33","category":"aromatic","targetId":"p-xylene","structureDecoyIds":["ethylbenzene","m-xylene","o-xylene"],"nameDecoyIds":["styrene","cumene","toluene"],"keyComparison":{"structureId":"ethylbenzene","nameId":"styrene"}},{"id":"pair-t34","category":"aromatic","targetId":"benzenesulfonic-acid","structureDecoyIds":["sodium-benzenesulfonate","benzoic-acid","phenol"],"nameDecoyIds":["sodium-benzoate","salicylic-acid","toluene"],"keyComparison":{"structureId":"sodium-benzenesulfonate","nameId":"sodium-benzoate"}},{"id":"pair-t35","category":"aromatic","targetId":"acetanilide","structureDecoyIds":["aniline","nitrobenzene","phenyl-acetate"],"nameDecoyIds":["anilinium-chloride","phenol","benzoic-acid"],"keyComparison":{"structureId":"aniline","nameId":"anilinium-chloride"}},{"id":"pair-t36","category":"aromatic","targetId":"ethylbenzene","structureDecoyIds":["m-xylene","o-xylene","toluene"],"nameDecoyIds":["styrene","cumene","benzene"],"keyComparison":{"structureId":"toluene","nameId":"styrene"}},{"id":"pair-t37","category":"aromatic","targetId":"sodium-benzoate","structureDecoyIds":["benzoic-acid","sodium-benzenesulfonate","sodium-phenoxide"],"nameDecoyIds":["salicylic-acid","benzenesulfonic-acid","phenol"],"keyComparison":{"structureId":"sodium-benzenesulfonate","nameId":"benzenesulfonic-acid"}}];
 
 /* =====================================================================
    PAIRING RUSH (ペアリングラッシュ) — integrated mode, spec v1.4 +
@@ -2389,13 +2402,15 @@ const PAIR_BANK = [{"id":"pair-t1","category":"aliphatic","targetId":"acetone","
    themselves use). No new storage keys, no schema change: existing
    orgorush:v1 records load unchanged.
    ===================================================================== */
-/* Banks: ~/workspace/orgorush/data/pairing-puzzles.json (T1–T23,
-   one-pair) and ~/workspace/orgorush/data/pairing-two-pair.json (21,
-   two-pair), both teacher-approved for the integrated app. Structures
+/* Banks: ~/workspace/orgorush/data/pairing-puzzles.json (T1–T37,
+   one-pair) and ~/workspace/orgorush/data/pairing-two-pair.json (35,
+   two-pair), both teacher-approved for the integrated app — the
+   round-2 set of 28 (T24–T37 + two-pair-022–035) was adopted in full
+   by the teacher on 2026-11-12. Structures
    / names / formulas resolve from the OrgoBingo master (DATA / byId)
    exactly like the other modes; only template composition is embedded
    here. */
-const PAIR2_BANK = [{"id":"two-pair-001","category":"aliphatic","targetIds":["ethanol","acetone"],"structureDecoyIds":["methanol","acetaldehyde"],"nameDecoyIds":["1-propanol","formaldehyde"],"keyComparison":{"structureId":"acetaldehyde","nameId":"formaldehyde"}},{"id":"two-pair-002","category":"aliphatic","targetIds":["1-propanol","2-propanol"],"structureDecoyIds":["ethanol","acetone"],"nameDecoyIds":["methanol","propionaldehyde"],"keyComparison":{"structureId":"acetone","nameId":"propionaldehyde"}},{"id":"two-pair-003","category":"aliphatic","targetIds":["ethyl-acetate","acetic-acid"],"structureDecoyIds":["methyl-acetate","formic-acid"],"nameDecoyIds":["methyl-formate","butyric-acid"],"keyComparison":{"structureId":"methyl-acetate","nameId":"methyl-formate"}},{"id":"two-pair-004","category":"aromatic","targetIds":["toluene","phenol"],"structureDecoyIds":["benzene","o-xylene"],"nameDecoyIds":["ethylbenzene","benzyl-alcohol"],"keyComparison":{"structureId":"o-xylene","nameId":"ethylbenzene"}},{"id":"two-pair-005","category":"aromatic","targetIds":["phthalic-acid","terephthalic-acid"],"structureDecoyIds":["isophthalic-acid","benzoic-acid"],"nameDecoyIds":["salicylic-acid","phthalic-anhydride"],"keyComparison":{"structureId":"benzoic-acid","nameId":"salicylic-acid"}},{"id":"two-pair-006","category":"aromatic","targetIds":["benzaldehyde","benzoic-acid"],"structureDecoyIds":["salicylic-acid","aniline"],"nameDecoyIds":["aspirin","benzyl-alcohol"],"keyComparison":{"structureId":"salicylic-acid","nameId":"aspirin"}},{"id":"two-pair-007","category":"aliphatic","targetIds":["1-butene","2-butyne"],"structureDecoyIds":["cis-2-butene","cyclobutane"],"nameDecoyIds":["trans-2-butene","1-butyne"],"keyComparison":{"structureId":"cis-2-butene","nameId":"trans-2-butene"}},{"id":"two-pair-008","category":"aliphatic","targetIds":["diethyl-ether","1-butanol"],"structureDecoyIds":["dimethyl-ether","2-butanol"],"nameDecoyIds":["ethanol","2-propanol"],"keyComparison":{"structureId":"dimethyl-ether","nameId":"ethanol"}},{"id":"two-pair-009","category":"aliphatic","targetIds":["methyl-formate","acetic-acid"],"structureDecoyIds":["methyl-acetate","formic-acid"],"nameDecoyIds":["ethyl-acetate","propionic-acid"],"keyComparison":{"structureId":"methyl-acetate","nameId":"ethyl-acetate"}},{"id":"two-pair-010","category":"aromatic","targetIds":["aniline","nitrobenzene"],"structureDecoyIds":["o-nitrotoluene","acetanilide"],"nameDecoyIds":["p-nitrotoluene","benzenediazonium-chloride"],"keyComparison":{"structureId":"o-nitrotoluene","nameId":"p-nitrotoluene"}},{"id":"two-pair-011","category":"aromatic","targetIds":["chlorobenzene","styrene"],"structureDecoyIds":["benzene","p-dichlorobenzene"],"nameDecoyIds":["cumene","ethylbenzene"],"keyComparison":{"structureId":"benzene","nameId":"ethylbenzene"}},{"id":"two-pair-012","category":"aromatic","targetIds":["salicylic-acid","methyl-salicylate"],"structureDecoyIds":["benzoic-acid","aspirin"],"nameDecoyIds":["phenyl-acetate","sodium-salicylate"],"keyComparison":{"structureId":"aspirin","nameId":"phenyl-acetate"}},{"id":"two-pair-013","category":"aliphatic","targetIds":["2-butanol","2-methyl-2-propanol"],"structureDecoyIds":["1-butanol","diethyl-ether"],"nameDecoyIds":["1-propanol","2-propanol"],"keyComparison":{"structureId":"1-butanol","nameId":"2-propanol"}},{"id":"two-pair-014","category":"aliphatic","targetIds":["trans-2-butene","2-methylpropene"],"structureDecoyIds":["1-butene","cis-2-butene"],"nameDecoyIds":["cyclobutane","1-butyne"],"keyComparison":{"structureId":"cis-2-butene","nameId":"cyclobutane"}},{"id":"two-pair-015","category":"aliphatic","targetIds":["1-butyne","13-butadiene"],"structureDecoyIds":["2-butyne","1-butene"],"nameDecoyIds":["2-methylpropene","trans-2-butene"],"keyComparison":{"structureId":"1-butene","nameId":"2-methylpropene"}},{"id":"two-pair-016","category":"aliphatic","targetIds":["butyric-acid","ethyl-acetate"],"structureDecoyIds":["methyl-acetate","propionic-acid"],"nameDecoyIds":["methyl-formate","acetic-acid"],"keyComparison":{"structureId":"propionic-acid","nameId":"methyl-formate"}},{"id":"two-pair-017","category":"aromatic","targetIds":["o-dichlorobenzene","m-dichlorobenzene"],"structureDecoyIds":["p-dichlorobenzene","o-cresol"],"nameDecoyIds":["chlorobenzene","phenol"],"keyComparison":{"structureId":"p-dichlorobenzene","nameId":"chlorobenzene"}},{"id":"two-pair-018","category":"aromatic","targetIds":["o-cresol","benzyl-alcohol"],"structureDecoyIds":["m-cresol","p-cresol"],"nameDecoyIds":["phenol","1-naphthol"],"keyComparison":{"structureId":"p-cresol","nameId":"phenol"}},{"id":"two-pair-019","category":"aromatic","targetIds":["1-naphthol","2-naphthol"],"structureDecoyIds":["naphthalene","m-cresol"],"nameDecoyIds":["phenol","o-cresol"],"keyComparison":{"structureId":"m-cresol","nameId":"o-cresol"}},{"id":"two-pair-020","category":"aromatic","targetIds":["aspirin","phenyl-acetate"],"structureDecoyIds":["salicylic-acid","benzoic-acid"],"nameDecoyIds":["isophthalic-acid","methyl-salicylate"],"keyComparison":{"structureId":"salicylic-acid","nameId":"methyl-salicylate"}},{"id":"two-pair-021","category":"aromatic","targetIds":["picric-acid","cumene"],"structureDecoyIds":["246-tribromophenol","ethylbenzene"],"nameDecoyIds":["maleic-acid","styrene"],"keyComparison":{"structureId":"ethylbenzene","nameId":"styrene"}}];
+const PAIR2_BANK = [{"id":"two-pair-001","category":"aliphatic","targetIds":["ethanol","acetone"],"structureDecoyIds":["methanol","acetaldehyde"],"nameDecoyIds":["1-propanol","formaldehyde"],"keyComparison":{"structureId":"acetaldehyde","nameId":"formaldehyde"}},{"id":"two-pair-002","category":"aliphatic","targetIds":["1-propanol","2-propanol"],"structureDecoyIds":["ethanol","acetone"],"nameDecoyIds":["methanol","propionaldehyde"],"keyComparison":{"structureId":"acetone","nameId":"propionaldehyde"}},{"id":"two-pair-003","category":"aliphatic","targetIds":["ethyl-acetate","acetic-acid"],"structureDecoyIds":["methyl-acetate","formic-acid"],"nameDecoyIds":["methyl-formate","butyric-acid"],"keyComparison":{"structureId":"methyl-acetate","nameId":"methyl-formate"}},{"id":"two-pair-004","category":"aromatic","targetIds":["toluene","phenol"],"structureDecoyIds":["benzene","o-xylene"],"nameDecoyIds":["ethylbenzene","benzyl-alcohol"],"keyComparison":{"structureId":"o-xylene","nameId":"ethylbenzene"}},{"id":"two-pair-005","category":"aromatic","targetIds":["phthalic-acid","terephthalic-acid"],"structureDecoyIds":["isophthalic-acid","benzoic-acid"],"nameDecoyIds":["salicylic-acid","phthalic-anhydride"],"keyComparison":{"structureId":"benzoic-acid","nameId":"salicylic-acid"}},{"id":"two-pair-006","category":"aromatic","targetIds":["benzaldehyde","benzoic-acid"],"structureDecoyIds":["salicylic-acid","aniline"],"nameDecoyIds":["aspirin","benzyl-alcohol"],"keyComparison":{"structureId":"salicylic-acid","nameId":"aspirin"}},{"id":"two-pair-007","category":"aliphatic","targetIds":["1-butene","2-butyne"],"structureDecoyIds":["cis-2-butene","cyclobutane"],"nameDecoyIds":["trans-2-butene","1-butyne"],"keyComparison":{"structureId":"cis-2-butene","nameId":"trans-2-butene"}},{"id":"two-pair-008","category":"aliphatic","targetIds":["diethyl-ether","1-butanol"],"structureDecoyIds":["dimethyl-ether","2-butanol"],"nameDecoyIds":["ethanol","2-propanol"],"keyComparison":{"structureId":"dimethyl-ether","nameId":"ethanol"}},{"id":"two-pair-009","category":"aliphatic","targetIds":["methyl-formate","acetic-acid"],"structureDecoyIds":["methyl-acetate","formic-acid"],"nameDecoyIds":["ethyl-acetate","propionic-acid"],"keyComparison":{"structureId":"methyl-acetate","nameId":"ethyl-acetate"}},{"id":"two-pair-010","category":"aromatic","targetIds":["aniline","nitrobenzene"],"structureDecoyIds":["o-nitrotoluene","acetanilide"],"nameDecoyIds":["p-nitrotoluene","benzenediazonium-chloride"],"keyComparison":{"structureId":"o-nitrotoluene","nameId":"p-nitrotoluene"}},{"id":"two-pair-011","category":"aromatic","targetIds":["chlorobenzene","styrene"],"structureDecoyIds":["benzene","p-dichlorobenzene"],"nameDecoyIds":["cumene","ethylbenzene"],"keyComparison":{"structureId":"benzene","nameId":"ethylbenzene"}},{"id":"two-pair-012","category":"aromatic","targetIds":["salicylic-acid","methyl-salicylate"],"structureDecoyIds":["benzoic-acid","aspirin"],"nameDecoyIds":["phenyl-acetate","sodium-salicylate"],"keyComparison":{"structureId":"aspirin","nameId":"phenyl-acetate"}},{"id":"two-pair-013","category":"aliphatic","targetIds":["2-butanol","2-methyl-2-propanol"],"structureDecoyIds":["1-butanol","diethyl-ether"],"nameDecoyIds":["1-propanol","2-propanol"],"keyComparison":{"structureId":"1-butanol","nameId":"2-propanol"}},{"id":"two-pair-014","category":"aliphatic","targetIds":["trans-2-butene","2-methylpropene"],"structureDecoyIds":["1-butene","cis-2-butene"],"nameDecoyIds":["cyclobutane","1-butyne"],"keyComparison":{"structureId":"cis-2-butene","nameId":"cyclobutane"}},{"id":"two-pair-015","category":"aliphatic","targetIds":["1-butyne","13-butadiene"],"structureDecoyIds":["2-butyne","1-butene"],"nameDecoyIds":["2-methylpropene","trans-2-butene"],"keyComparison":{"structureId":"1-butene","nameId":"2-methylpropene"}},{"id":"two-pair-016","category":"aliphatic","targetIds":["butyric-acid","ethyl-acetate"],"structureDecoyIds":["methyl-acetate","propionic-acid"],"nameDecoyIds":["methyl-formate","acetic-acid"],"keyComparison":{"structureId":"propionic-acid","nameId":"methyl-formate"}},{"id":"two-pair-017","category":"aromatic","targetIds":["o-dichlorobenzene","m-dichlorobenzene"],"structureDecoyIds":["p-dichlorobenzene","o-cresol"],"nameDecoyIds":["chlorobenzene","phenol"],"keyComparison":{"structureId":"p-dichlorobenzene","nameId":"chlorobenzene"}},{"id":"two-pair-018","category":"aromatic","targetIds":["o-cresol","benzyl-alcohol"],"structureDecoyIds":["m-cresol","p-cresol"],"nameDecoyIds":["phenol","1-naphthol"],"keyComparison":{"structureId":"p-cresol","nameId":"phenol"}},{"id":"two-pair-019","category":"aromatic","targetIds":["1-naphthol","2-naphthol"],"structureDecoyIds":["naphthalene","m-cresol"],"nameDecoyIds":["phenol","o-cresol"],"keyComparison":{"structureId":"m-cresol","nameId":"o-cresol"}},{"id":"two-pair-020","category":"aromatic","targetIds":["aspirin","phenyl-acetate"],"structureDecoyIds":["salicylic-acid","benzoic-acid"],"nameDecoyIds":["isophthalic-acid","methyl-salicylate"],"keyComparison":{"structureId":"salicylic-acid","nameId":"methyl-salicylate"}},{"id":"two-pair-021","category":"aromatic","targetIds":["picric-acid","cumene"],"structureDecoyIds":["246-tribromophenol","ethylbenzene"],"nameDecoyIds":["maleic-acid","styrene"],"keyComparison":{"structureId":"ethylbenzene","nameId":"styrene"}},{"id":"two-pair-022","category":"aliphatic","targetIds":["ethylene-glycol","glycerol"],"structureDecoyIds":["1-propanol","2-propanol"],"nameDecoyIds":["ethanol","lactic-acid"],"keyComparison":{"structureId":"2-propanol","nameId":"lactic-acid"}},{"id":"two-pair-023","category":"aliphatic","targetIds":["maleic-acid","fumaric-acid"],"structureDecoyIds":["butyric-acid","acetic-acid"],"nameDecoyIds":["formic-acid","lactic-acid"],"keyComparison":{"structureId":"butyric-acid","nameId":"lactic-acid"}},{"id":"two-pair-024","category":"aliphatic","targetIds":["cyclohexane","cyclohexene"],"structureDecoyIds":["cyclopentane","cyclopentene"],"nameDecoyIds":["hexane","cyclopropane"],"keyComparison":{"structureId":"cyclopentane","nameId":"hexane"}},{"id":"two-pair-025","category":"aliphatic","targetIds":["acetylene","propyne"],"structureDecoyIds":["ethylene","propene"],"nameDecoyIds":["vinyl-chloride","1-butyne"],"keyComparison":{"structureId":"ethylene","nameId":"vinyl-chloride"}},{"id":"two-pair-026","category":"aliphatic","targetIds":["dichloromethane","trichloromethane"],"structureDecoyIds":["chloromethane","iodoform"],"nameDecoyIds":["tetrachloromethane","1122-tetrabromoethane"],"keyComparison":{"structureId":"iodoform","nameId":"tetrachloromethane"}},{"id":"two-pair-027","category":"aliphatic","targetIds":["acetic-anhydride","maleic-anhydride"],"structureDecoyIds":["maleic-acid","acetic-acid"],"nameDecoyIds":["fumaric-acid","propionic-acid"],"keyComparison":{"structureId":"maleic-acid","nameId":"fumaric-acid"}},{"id":"two-pair-028","category":"aliphatic","targetIds":["polyethylene","polyacetylene"],"structureDecoyIds":["ethylene","acetylene"],"nameDecoyIds":["propene","13-butadiene"],"keyComparison":{"structureId":"acetylene","nameId":"13-butadiene"}},{"id":"two-pair-029","category":"aromatic","targetIds":["benzene","toluene"],"structureDecoyIds":["ethylbenzene","chlorobenzene"],"nameDecoyIds":["styrene","cumene"],"keyComparison":{"structureId":"ethylbenzene","nameId":"styrene"}},{"id":"two-pair-030","category":"aromatic","targetIds":["cumene","cumene-hydroperoxide"],"structureDecoyIds":["ethylbenzene","phenol"],"nameDecoyIds":["toluene","styrene"],"keyComparison":{"structureId":"ethylbenzene","nameId":"toluene"}},{"id":"two-pair-031","category":"aromatic","targetIds":["phenol","sodium-phenoxide"],"structureDecoyIds":["benzyl-alcohol","246-tribromophenol"],"nameDecoyIds":["picric-acid","m-cresol"],"keyComparison":{"structureId":"benzyl-alcohol","nameId":"m-cresol"}},{"id":"two-pair-032","category":"aromatic","targetIds":["picric-acid","246-trinitrotoluene"],"structureDecoyIds":["nitrobenzene","o-nitrotoluene"],"nameDecoyIds":["phenol","p-nitrotoluene"],"keyComparison":{"structureId":"o-nitrotoluene","nameId":"p-nitrotoluene"}},{"id":"two-pair-033","category":"aromatic","targetIds":["benzenediazonium-chloride","p-phenylazophenol"],"structureDecoyIds":["phenol","aniline"],"nameDecoyIds":["1-naphthol","picric-acid"],"keyComparison":{"structureId":"phenol","nameId":"1-naphthol"}},{"id":"two-pair-034","category":"aromatic","targetIds":["benzenesulfonic-acid","sodium-benzenesulfonate"],"structureDecoyIds":["benzoic-acid","phenol"],"nameDecoyIds":["sodium-benzoate","sodium-phenoxide"],"keyComparison":{"structureId":"benzoic-acid","nameId":"sodium-benzoate"}},{"id":"two-pair-035","category":"aromatic","targetIds":["aniline","anilinium-chloride"],"structureDecoyIds":["nitrobenzene","acetanilide"],"nameDecoyIds":["benzenediazonium-chloride","phenol"],"keyComparison":{"structureId":"nitrobenzene","nameId":"benzenediazonium-chloride"}}];
 const pairCats = { aliphatic: true, aromatic: true };
 const pairSettings = { sub: "one", count: 5 };   // start-screen choices; frozen into pairSess at session start
 let pairSess = null;   // { sub, count, queue:[tpl], i, results:[], score, pairFirstTotal, counted, fxDone }
