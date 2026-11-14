@@ -469,12 +469,12 @@
         #scr-zukan .z-count{font-size:11px; padding:4px;}
       }
       #z-range-chips, #z-state-chips{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:4px;}
-      #z-range-chips button, #z-state-chips button{min-height:40px; padding:4px 8px; font-size:12px; white-space:nowrap;}
+      #z-range-chips button, #z-state-chips button{min-height:36px; padding:3px 8px; font-size:12px; white-space:nowrap;}
       #z-range-chips button, #z-state-chips button, #z-fg-chips button{position:relative;}
       #z-range-chips button.on::after, #z-state-chips button.on::after, #z-fg-chips button.on::after{content:"✓"; position:absolute; top:0; right:3px; font-size:10px; line-height:1;}
-      #z-review-toggle{margin-left:auto;}
       #z-state-chips button{flex:1 1 auto; padding-left:3px; padding-right:3px;}
-      #z-fg-toggle{min-height:40px; text-align:left;}
+      #z-fg-toggle{min-height:36px; padding-top:4px; padding-bottom:4px; text-align:left;}
+      #z-fg-chips button{min-height:36px; padding-top:4px; padding-bottom:4px;}
       #z-fg-label{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
       #z-fg-panel{max-height:30dvh; overflow-y:auto;}
       .z-empty{grid-column:1/-1; text-align:center; padding:20px 8px; color:var(--sub);}
@@ -924,13 +924,13 @@
         <div class="chips" id="z-range-chips">
           <button type="button" data-zrange="skel:脂肪族" aria-pressed="false">脂肪族</button>
           <button type="button" data-zrange="skel:芳香族" aria-pressed="false">芳香族</button>
-          <button type="button" id="z-review-toggle" aria-pressed="false">要復習のみ</button>
         </div>
         <div class="chips" id="z-state-chips" aria-label="学習状態">
           <button type="button" data-state="met" aria-pressed="false">未発見</button>
           <button type="button" data-state="seen" aria-pressed="false">出会った</button>
-          <button type="button" data-state="correct" aria-pressed="false">正解（未習得）</button>
+          <button type="button" data-state="correct" aria-label="正解（未習得）" aria-pressed="false">正解</button>
           <button type="button" data-state="mastered" aria-pressed="false">習得</button>
+          <button type="button" id="z-review-toggle" aria-label="要復習のみ" aria-pressed="false">要復習</button>
         </div>
         <button type="button" class="fg-toggle" id="z-fg-toggle" aria-expanded="false" aria-controls="z-fg-panel">
           <span id="z-fg-label">官能基：すべて</span><span class="fg-caret" aria-hidden="true">▾</span>
@@ -2396,7 +2396,7 @@ $("#z-fg-toggle").addEventListener("click", () => {
   if (open) renderFgChips();
 });
 document.querySelectorAll("#z-range-chips button, #z-state-chips button").forEach(b => {
-  b.setAttribute("aria-label", b.textContent);
+  if (!b.hasAttribute("aria-label")) b.setAttribute("aria-label", b.textContent);
 });
 document.querySelectorAll("#z-range-chips [data-zrange], #z-state-chips [data-state]").forEach(b => {
   b.addEventListener("click", () => {
