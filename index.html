@@ -460,12 +460,16 @@
       .z-title{font-size:20px; font-weight:900; flex:1; white-space:nowrap;}
       .z-count{font-weight:800; font-size:13px; color:var(--accent); background:var(--chip); border-radius:999px; padding:5px 10px; white-space:nowrap;}
       .z-counts{display:flex; gap:8px; align-items:center; flex:none;}
-      @media (max-width:480px){
-        #scr-zukan .z-head{flex-wrap:wrap; height:auto; min-height:46px; row-gap:6px; padding:2px 0 4px;}
-        #scr-zukan .z-counts{flex-basis:100%;}
-      }
-      #z-range-chips, #z-state-chips{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:8px;}
-      #z-range-chips button, #z-state-chips button{min-height:44px; padding:6px 3px; font-size:13px;}
+      #scr-zukan .z-head{height:auto; min-height:44px; gap:5px; flex-wrap:wrap;}
+      #scr-zukan .z-title{font-size:18px;}
+      #scr-zukan .z-counts{gap:5px;}
+      #scr-zukan .z-count{font-size:12px; padding:4px 6px;}
+      #z-range-chips, #z-state-chips{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:4px;}
+      #z-range-chips button, #z-state-chips button{min-height:40px; padding:4px 8px; font-size:12px; white-space:nowrap;}
+      #z-state-chips button{flex:1 1 auto; padding-left:3px; padding-right:3px;}
+      #z-fg-toggle{min-height:40px; text-align:left;}
+      #z-fg-label{min-width:0; overflow-wrap:anywhere;}
+      #z-fg-panel{max-height:35dvh; overflow-y:auto;}
       .z-empty{grid-column:1/-1; text-align:center; padding:20px 8px; color:var(--sub);}
       .z-grid{flex:1 1 auto; min-height:0; overflow-y:auto; display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:2px 0 12px; align-content:start; grid-auto-rows:min-content;}
       .z-card{background:var(--card); border:2px solid var(--line); border-radius:14px; padding:8px 8px 9px; text-align:left; display:flex; flex-direction:column; gap:4px; min-height:152px; position:relative; overflow:hidden;}
@@ -905,21 +909,19 @@
         <div class="z-title">図鑑</div>
         <div class="z-counts">
           <div class="z-count" id="z-master-count">習得 0/121</div>
-          <div class="z-count" id="z-count">正解した 0/121</div>
+          <div class="z-count" id="z-count">正解 0/121</div>
         </div>
       </div>
       <div class="grp" style="margin-top:6px">
         <div class="chips" id="z-range-chips">
-          <button type="button" data-zrange="all" class="on">すべて</button>
-          <button type="button" data-zrange="skel:脂肪族">脂肪族</button>
-          <button type="button" data-zrange="skel:芳香族">芳香族</button>
+          <button type="button" data-zrange="skel:脂肪族" aria-pressed="false">脂肪族</button>
+          <button type="button" data-zrange="skel:芳香族" aria-pressed="false">芳香族</button>
         </div>
         <div class="chips" id="z-state-chips" aria-label="学習状態">
-          <button type="button" data-state="" class="on" aria-pressed="true">すべて</button>
           <button type="button" data-state="met" aria-pressed="false">未発見</button>
           <button type="button" data-state="seen" aria-pressed="false">出会った</button>
-          <button type="button" data-state="correct" aria-pressed="false">正解した</button>
-          <button type="button" data-state="mastered" aria-pressed="false">習得した</button>
+          <button type="button" data-state="correct" aria-pressed="false">正解</button>
+          <button type="button" data-state="mastered" aria-pressed="false">習得</button>
           <button type="button" data-state="review" aria-pressed="false">要復習</button>
         </div>
         <button type="button" class="fg-toggle" id="z-fg-toggle" aria-expanded="false" aria-controls="z-fg-panel">
@@ -2271,8 +2273,8 @@ $("#r-home").addEventListener("click", () => { show("scr-home"); refreshReviewBa
 $("#start-btn").addEventListener("click", () => { startSession(); });
 
 /* ---------- zukan ---------- */
-/* Filters combine: skeleton chips AND the functional-group selector. */
-const zukan = { skel: null, fg: null, state: null };
+/* Selected filters combine with AND. */
+const zukan = { skel: new Set(), fg: new Set(), state: new Set() };
 function stateChips(c) {
   const r = store.compounds[c.id];
   let chips = [];
@@ -2291,15 +2293,15 @@ function stateChips(c) {
 function stateText(c) { return stateChips(c).map(x => x.label).join(" / "); }
 function zukanPool() {
   let pool = DATA.compounds.slice();
-  if (zukan.skel) pool = pool.filter(c => c.skeletonCategory === zukan.skel);
-  if (zukan.fg) pool = pool.filter(c => c.functionalGroups.includes(zukan.fg));
-  if (zukan.state) pool = pool.filter(c => stateChips(c).some(x => x.cls === zukan.state));
+  if (zukan.skel.size) pool = pool.filter(c => [...zukan.skel].every(v => c.skeletonCategory === v));
+  if (zukan.fg.size) pool = pool.filter(c => [...zukan.fg].every(g => c.functionalGroups.includes(g)));
+  if (zukan.state.size) pool = pool.filter(c => [...zukan.state].every(v => stateChips(c).some(x => x.cls === v)));
   return pool;
 }
 function renderZukan() {
   const done = DATA.compounds.filter(c => recOf(c.id).everCorrect).length;
   const mastered = DATA.compounds.filter(c => recOf(c.id).mastered).length;
-  $("#z-count").textContent = "\u6b63\u89e3\u3057\u305f " + done + "/" + DATA.compounds.length;
+  $("#z-count").textContent = "正解 " + done + "/" + DATA.compounds.length;
   const zm = $("#z-master-count"); if (zm) zm.textContent = "\u7fd2\u5f97 " + mastered + "/" + DATA.compounds.length;
   const grid = $("#z-grid"); grid.innerHTML = "";
   const pool = zukanPool();
@@ -2335,76 +2337,58 @@ function openDetail(id) {
     + storySection;
   show("scr-detail");
 }
-/* Functional-group selector (zukan only): a collapsible chip grid.
-   Counts are computed under the CURRENT skeleton filter; groups at 0 are
-   dimmed and not selectable. Single-select; picking a chip collapses. */
+/* Functional groups can be combined; the panel stays open for multiple selections. */
 const FG_ALL = (function () {
   const totals = {};
   DATA.compounds.forEach(c => c.functionalGroups.forEach(g => { totals[g] = (totals[g] || 0) + 1; }));
   return Object.keys(totals).sort((a, b) => totals[b] - totals[a] || (a < b ? -1 : 1));
 })();
 function fgCountNow(g) {
-  const base = zukan.skel ? DATA.compounds.filter(c => c.skeletonCategory === zukan.skel) : DATA.compounds;
-  return base.filter(c => c.functionalGroups.includes(g)).length;
+  return DATA.compounds.filter(c => [...zukan.skel].every(v => c.skeletonCategory === v) && c.functionalGroups.includes(g)).length;
 }
 function updateFgLabel() {
-  $("#z-fg-label").textContent = "官能基：" + (zukan.fg || "すべて");
-  $("#z-fg-toggle").classList.toggle("on", !!zukan.fg);
+  $("#z-fg-label").textContent = "官能基：" + (zukan.fg.size ? [...zukan.fg].join("、") : "指定なし");
+  $("#z-fg-toggle").classList.toggle("on", zukan.fg.size > 0);
 }
 function renderFgChips() {
   const box = $("#z-fg-chips");
   box.innerHTML = "";
-  const all = document.createElement("button");
-  all.type = "button";
-  all.className = !zukan.fg ? "on" : "";
-  const skelN = zukan.skel ? DATA.compounds.filter(c => c.skeletonCategory === zukan.skel).length : DATA.compounds.length;
-  all.innerHTML = "<span>すべて</span>" + '<span class="cnt">' + skelN + "</span>";
-  all.addEventListener("click", () => pickFg(null));
-  box.appendChild(all);
   FG_ALL.forEach(g => {
-    const n = fgCountNow(g);
     const b = document.createElement("button");
     b.type = "button";
-    b.className = (zukan.fg === g ? "on" : "") + (n === 0 ? " zero" : "");
-    b.disabled = n === 0;
-    b.innerHTML = "<span>" + g + "</span>" + '<span class="cnt">' + n + "</span>";
-    b.addEventListener("click", () => pickFg(g));
+    const on = zukan.fg.has(g);
+    b.className = on ? "on" : "";
+    b.setAttribute("aria-pressed", String(on));
+    b.textContent = g;
+    b.addEventListener("click", () => {
+      pickFg(g);
+      const selected = zukan.fg.has(g);
+      b.classList.toggle("on", selected);
+      b.setAttribute("aria-pressed", String(selected));
+    });
     box.appendChild(b);
   });
 }
 function pickFg(g) {
-  zukan.fg = g;
-  $("#z-fg-panel").hidden = true;
-  $("#z-fg-toggle").setAttribute("aria-expanded", "false");
+  if (zukan.fg.has(g)) zukan.fg.delete(g); else zukan.fg.add(g);
   updateFgLabel();
-  renderFgChips();
   renderZukan();
 }
 $("#z-fg-toggle").addEventListener("click", () => {
   const panel = $("#z-fg-panel");
   const open = panel.hidden;
   panel.hidden = !open;
-  $("#z-fg-toggle").setAttribute("aria-expanded", open ? "true" : "false");
+  $("#z-fg-toggle").setAttribute("aria-expanded", String(open));
   if (open) renderFgChips();
 });
-document.querySelectorAll("#z-range-chips button").forEach(b => {
+document.querySelectorAll("#z-range-chips button, #z-state-chips button").forEach(b => {
   b.addEventListener("click", () => {
-    const v = b.dataset.zrange;
-    zukan.skel = v === "all" ? null : v.slice(5);
-    document.querySelectorAll("#z-range-chips button").forEach(x => x.classList.toggle("on", x === b));
-    /* If the selected group no longer exists under this skeleton, reset it. */
-    if (zukan.fg && fgCountNow(zukan.fg) === 0) { zukan.fg = null; updateFgLabel(); }
-    renderFgChips();
-    renderZukan();
-  });
-});
-document.querySelectorAll("#z-state-chips button").forEach(b => {
-  b.addEventListener("click", () => {
-    zukan.state = b.dataset.state || null;
-    document.querySelectorAll("#z-state-chips button").forEach(x => {
-      x.classList.toggle("on", x === b);
-      x.setAttribute("aria-pressed", String(x === b));
-    });
+    const set = b.dataset.zrange ? zukan.skel : zukan.state;
+    const value = b.dataset.zrange ? b.dataset.zrange.slice(5) : b.dataset.state;
+    if (set.has(value)) set.delete(value); else set.add(value);
+    const on = set.has(value);
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", String(on));
     renderZukan();
   });
 });
