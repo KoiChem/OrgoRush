@@ -2273,8 +2273,8 @@ $("#r-home").addEventListener("click", () => { show("scr-home"); refreshReviewBa
 $("#start-btn").addEventListener("click", () => { startSession(); });
 
 /* ---------- zukan ---------- */
-/* Selected filters combine with AND. */
-const zukan = { skel: new Set(), fg: new Set(), state: new Set() };
+/* Each group is a union; groups combine with AND. */
+const zukan = { skel: new Set(["脂肪族", "芳香族"]), fg: new Set(), state: new Set(["met", "seen", "correct", "mastered", "review"]) };
 function stateChips(c) {
   const r = store.compounds[c.id];
   let chips = [];
@@ -2293,9 +2293,9 @@ function stateChips(c) {
 function stateText(c) { return stateChips(c).map(x => x.label).join(" / "); }
 function zukanPool() {
   let pool = DATA.compounds.slice();
-  if (zukan.skel.size) pool = pool.filter(c => [...zukan.skel].every(v => c.skeletonCategory === v));
-  if (zukan.fg.size) pool = pool.filter(c => [...zukan.fg].every(g => c.functionalGroups.includes(g)));
-  if (zukan.state.size) pool = pool.filter(c => [...zukan.state].every(v => stateChips(c).some(x => x.cls === v)));
+  pool = pool.filter(c => zukan.skel.has(c.skeletonCategory));
+  pool = pool.filter(c => c.functionalGroups.some(g => zukan.fg.has(g)) || (!c.functionalGroups.length && zukan.fg.has("なし")));
+  pool = pool.filter(c => stateChips(c).some(x => zukan.state.has(x.cls)));
   return pool;
 }
 function renderZukan() {
@@ -2343,12 +2343,14 @@ const FG_ALL = (function () {
   DATA.compounds.forEach(c => c.functionalGroups.forEach(g => { totals[g] = (totals[g] || 0) + 1; }));
   return Object.keys(totals).sort((a, b) => totals[b] - totals[a] || (a < b ? -1 : 1));
 })();
+FG_ALL.push("なし");
+FG_ALL.forEach(g => zukan.fg.add(g));
 function fgCountNow(g) {
-  return DATA.compounds.filter(c => [...zukan.skel].every(v => c.skeletonCategory === v) && c.functionalGroups.includes(g)).length;
+  return DATA.compounds.filter(c => zukan.skel.has(c.skeletonCategory) && (g === "なし" ? !c.functionalGroups.length : c.functionalGroups.includes(g))).length;
 }
 function updateFgLabel() {
-  $("#z-fg-label").textContent = "官能基：" + (zukan.fg.size ? [...zukan.fg].join("、") : "指定なし");
-  $("#z-fg-toggle").classList.toggle("on", zukan.fg.size > 0);
+  $("#z-fg-label").textContent = "官能基：" + (zukan.fg.size === FG_ALL.length ? "すべて" : zukan.fg.size === 0 ? "選択なし" : zukan.fg.size === 1 ? [...zukan.fg][0] : zukan.fg.size + "種類");
+  $("#z-fg-toggle").classList.toggle("on", zukan.fg.size !== FG_ALL.length);
 }
 function renderFgChips() {
   const box = $("#z-fg-chips");
@@ -2382,6 +2384,8 @@ $("#z-fg-toggle").addEventListener("click", () => {
   if (open) renderFgChips();
 });
 document.querySelectorAll("#z-range-chips button, #z-state-chips button").forEach(b => {
+  b.classList.add("on");
+  b.setAttribute("aria-pressed", "true");
   b.addEventListener("click", () => {
     const set = b.dataset.zrange ? zukan.skel : zukan.state;
     const value = b.dataset.zrange ? b.dataset.zrange.slice(5) : b.dataset.state;
