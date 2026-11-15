@@ -8,10 +8,12 @@
     <title>オルゴラッシュ</title>
     <style>
       :root{
-        --bg:#FFF8F1; --grid-line:rgba(166,110,58,.12); --card:#FFFFFF; --tile:#FFFDF8;
-        --ink:#3B302C; --sub:#93755F; --line:#F0DFCB;
-        --accent:#C4632F; --accent-ink:#FFFFFF;
-        --amber:#DFA32E; --chip:#FBEEDC; --chip-on:#F6D9B8;
+        --bg:#FFF8EC; --grid-line:rgba(166,110,58,.12); --card:#FFFFFF; --tile:#FFFDF8;
+        --ink:#44403C; --sub:#78716C; --line:#EDDCBB;
+        --accent:#BE6A0B; --accent-ink:#FFFFFF;
+        --primary:#F5A623; --primary-ink:#44403C;
+        --on-ink:#44403C;
+        --amber:#F5A623; --chip:#FDF0D5; --chip-on:#FFE3AE;
         --good:#7C5600; --good-bg:#F9ECCB; --good-border:#B97F06;
         /* pairing two-pair colors — the ONLY place pair colors are defined:
            pair 1 = honey/amber, pair 2 = azuki (dark values in the dark
@@ -32,7 +34,8 @@
           --bg:#251A13; --grid-line:rgba(230,180,120,.10); --card:#33241A; --tile:#FFFDF8;
           --ink:#F6E9DA; --sub:#C6A78C; --line:#4C3524;
           --accent:#E08A5F; --accent-ink:#2A1A10;
-          --amber:#E5B95C; --chip:#453122; --chip-on:#5F4128;
+          --primary:#F5A623; --primary-ink:#44403C;
+          --amber:#F0B95A; --chip:#453122; --chip-on:#8A5A10; --on-ink:#F6E9DA;
           --good:#F2CE7A; --good-bg:#4A3810; --good-border:#DFA32E;
           --pair1-border:#DFA32E; --pair1-bg:#4A3810; --pair1-dot:#DFA32E;
           --pair2-border:#DC93A2; --pair2-bg:#512D35; --pair2-soft:#42232A; --pair2-dot:#DC93A2;
@@ -93,7 +96,7 @@
         font-weight:700; font-size:14px; padding:6px 4px; border:2px solid transparent;
         display:flex; align-items:center; justify-content:center; gap:5px; line-height:1.25;
       }
-      .seg button.on{background:var(--chip-on); border-color:var(--accent);}
+      .seg button.on{background:var(--chip-on); border-color:var(--accent); color:var(--on-ink);}
       .seg button .cnt{background:var(--accent); color:var(--accent-ink); border-radius:999px; font-size:12px; padding:1px 7px; font-weight:800;}
       #dir-seg button{font-size:12.5px; padding:6px 2px; white-space:nowrap; min-width:0;}
       #dir-seg button.mode-na{opacity:.38;}
@@ -120,7 +123,7 @@
         min-height:40px; border-radius:999px; background:var(--chip); padding:6px 13px;
         font-weight:700; font-size:13.5px; border:2px solid transparent;
       }
-      .chips button.on{background:var(--chip-on); border-color:var(--accent);}
+      .chips button.on{background:var(--chip-on); border-color:var(--accent); color:var(--on-ink);}
       /* unit toggle cards (home range) */
       .unit-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
       .unit-card{
@@ -134,7 +137,8 @@
       }
       .unit-card .u-name{flex:1; font-size:13.5px; line-height:1.25;}
       .unit-card .u-name small{display:block; font-size:11.5px; color:var(--sub); font-weight:800; margin-top:1px;}
-      .unit-card.on{border-color:var(--accent); background:var(--chip-on);}
+      .unit-card.on{border-color:var(--accent); background:var(--chip-on); color:var(--on-ink);}
+      .unit-card.on .u-name small{color:var(--sub);}
       .unit-card.on .u-check{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
       .unit-card:not(.on) .u-name{color:var(--sub);}
       /* zukan functional-group selector */
@@ -154,11 +158,11 @@
         display:flex; align-items:center; justify-content:space-between; gap:6px;
       }
       .fg-chips button .cnt{font-size:11.5px; color:var(--sub); font-weight:800; flex:none;}
-      .fg-chips button.on{background:var(--chip-on); border-color:var(--accent);}
+      .fg-chips button.on{background:var(--chip-on); border-color:var(--accent); color:var(--on-ink);}
       .fg-chips button.zero{opacity:.38;}
       .start-btn{
         margin-top:auto; width:100%; min-height:58px; border-radius:16px;
-        background:var(--accent); color:var(--accent-ink); font-size:19px; font-weight:800;
+        background:var(--primary); color:var(--primary-ink); font-size:19px; font-weight:800;
         box-shadow:var(--shadow); letter-spacing:.04em;
       }
       .start-btn:active{transform:scale(.985);}
@@ -179,7 +183,7 @@
       @keyframes burst{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
       /* T3 newly-mastered chip: temporarily replaces the combo label in the
          same header slot (no new row), then the combo label returns */
-      .q-combo.mastered{background:var(--amber); color:#3B2A05;}
+      .q-combo.mastered{background:var(--amber); color:#44403C;}
       .q-combo.mpop{animation:masteredPop .65s ease;}
       @keyframes masteredPop{0%{transform:scale(.75)}45%{transform:scale(1.12)}100%{transform:scale(1)}}
       @media (prefers-reduced-motion: reduce){ .q-bar i{transition:none;} }
@@ -199,6 +203,8 @@
          anything that still does not fit at the floor size wraps onto
          a second line instead of spilling. */
       .q-name{font-size:clamp(19px, 6.4vw, 30px); font-weight:800; text-align:center; line-height:1.3; word-break:normal; overflow-wrap:anywhere; text-wrap:balance; min-height:0; flex:0 1 auto; width:100%; max-width:100%;}
+      .q-prompt{font-size:19px; font-weight:900; text-align:center; margin-bottom:8px;}
+      .q-prompt-sub{font-size:13px; font-weight:700; color:var(--sub); text-align:center; margin-bottom:8px;}
       .q-formula{font-size:16px; color:var(--sub); font-weight:700; flex:none;}
       .q-struct{
         background:var(--tile); border:2px solid var(--line); border-radius:16px;
@@ -236,7 +242,7 @@
       .choice.dim{opacity:.55;}
       /* T1 correct-answer bounce: transform only, layout never moves */
       .choice.pop{animation:choicePop .38s ease;}
-      @keyframes choicePop{0%{transform:scale(1)}35%{transform:scale(1.08); box-shadow:0 0 0 3px rgba(223,163,46,.55), 0 4px 16px rgba(185,127,6,.35);}70%{transform:scale(.99)}100%{transform:scale(1)}}
+      @keyframes choicePop{0%{transform:scale(1)}35%{transform:scale(1.08); box-shadow:0 0 0 3px rgba(245,166,35,.55), 0 4px 16px rgba(200,120,10,.35);}70%{transform:scale(.99)}100%{transform:scale(1)}}
 
       /* ---------- Phase 4 decorative FX layer ----------
          Stars / confetti live only in these layers: absolutely positioned,
@@ -356,7 +362,7 @@
       .story-title{font-size:11.5px; font-weight:900; letter-spacing:.1em; color:var(--accent); white-space:nowrap;}
       .story-tag{
         font-size:10.5px; font-weight:800; line-height:1.5; border-radius:999px; padding:1px 8px; white-space:nowrap;
-        background:var(--chip-on); color:var(--accent);
+        background:#F6D9A8; color:var(--accent);
       }
       .story-name{margin:7px 0 0; font-size:15.5px; font-weight:800; line-height:1.45;}
       .story-body{margin:7px 0 0; font-size:13.5px; line-height:1.8; font-weight:500; color:var(--ink);}
@@ -369,7 +375,7 @@
       .boost.first::after{
         content:""; position:absolute; inset:-3px; border-radius:13px; pointer-events:none;
         border:2px solid rgba(223,163,46,.85);
-        box-shadow:0 0 14px 2px rgba(223,163,46,.55), inset 0 0 8px rgba(223,163,46,.30);
+        box-shadow:0 0 14px 2px rgba(245,166,35,.55), inset 0 0 8px rgba(223,163,46,.30);
         opacity:0; animation:boostRing .5s ease .12s both;
       }
       @keyframes boostRing{ 0%{opacity:0;} 35%{opacity:1;} 100%{opacity:0;} }
@@ -469,7 +475,7 @@
         #scr-zukan .z-count{font-size:11px; padding:4px;}
       }
       #z-range-chips, #z-state-chips{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:4px;}
-      #z-range-chips button, #z-state-chips button{min-height:36px; padding:3px 8px; font-size:12px; white-space:nowrap;}
+      #z-range-chips button, #z-state-chips button{min-height:40px; padding:3px 8px; font-size:12px; white-space:nowrap;}
       #z-range-chips button, #z-state-chips button, #z-fg-chips button{position:relative;}
       #z-range-chips button.on::after, #z-state-chips button.on::after, #z-fg-chips button.on::after{content:"✓"; position:absolute; top:0; right:3px; font-size:10px; line-height:1;}
       #z-state-chips button{flex:1 1 auto; padding-left:3px; padding-right:3px;}
@@ -477,6 +483,7 @@
       #z-fg-chips button{min-height:36px; padding-top:4px; padding-bottom:4px;}
       #z-fg-label{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
       #z-fg-panel{max-height:30dvh; overflow-y:auto;}
+      .fg-note{font-size:12px; font-weight:700; color:var(--sub); line-height:1.6; padding:8px 4px 2px;}
       .z-empty{grid-column:1/-1; text-align:center; padding:20px 8px; color:var(--sub);}
       .z-empty button{min-height:40px; padding:6px 14px; margin-top:10px; border:2px solid var(--line); border-radius:12px; background:var(--chip); font-weight:700;}
       .z-grid{flex:1 1 auto; min-height:0; overflow-y:auto; display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:2px 0 12px; align-content:start; grid-auto-rows:min-content;}
@@ -488,32 +495,57 @@
       .z-chips{display:flex; flex-wrap:wrap; gap:4px; margin-top:auto; flex:none; width:100%; min-height:21px; align-items:center; position:relative; z-index:2; padding-top:3px;}
       .z-chip{font-size:11px; font-weight:800; border-radius:999px; padding:2px 7px; background:var(--chip); color:var(--sub); flex:none; white-space:nowrap; line-height:1.5;}
       .z-chip.met{background:#EDEBE6; color:#6B6259;}
-      .z-chip.correct{background:var(--good-bg); color:var(--good);}
-      .z-chip.mastered{background:var(--amber); color:#3B2A05; border:1.5px solid #B97F0E;}
+      .z-chip.practice{background:#F3E3CB; color:#7A5A28;}
+      .z-chip.mastered{background:var(--amber); color:#44403C; border:1.5px solid #B97F0E;}
       .z-chip.review{background:var(--bad-bg); color:var(--bad);}
-      .z-chip.seen{background:var(--chip-on); color:var(--ink);}
+      
       .week-bar{flex:none; display:flex; align-items:center; gap:7px; background:var(--chip); border:2px solid var(--line); border-radius:999px; padding:6px 12px; margin-top:8px; font-size:12.5px; font-weight:800;}
       .week-bar .wk-label{color:var(--sub); font-size:11.5px; letter-spacing:.06em;}
+      .wk-info{flex:none; width:20px; height:20px; border-radius:50%; border:2px solid var(--sub); background:transparent; color:var(--sub); font-size:12px; font-weight:900; line-height:1; padding:0; cursor:pointer;}
+      .dir-note{flex:none; font-size:12.5px; font-weight:700; color:var(--accent); margin-top:6px; padding:0 6px;}
+      .wk-note{flex:none; font-size:12.5px; font-weight:700; color:var(--sub); line-height:1.6; margin-top:6px; padding:0 6px;}
       .week-dots{display:flex; gap:4px; align-items:center;}
       .week-dots i{width:10px; height:10px; border-radius:50%; background:var(--card); border:2px solid var(--amber); display:block;}
       .week-dots i.fill{background:var(--amber);}
-      .week-bar .wk-done{background:var(--amber); color:#3B2A05; border-radius:999px; padding:1px 8px; font-size:11px;}
+      .week-bar .wk-done{background:var(--amber); color:#44403C; border-radius:999px; padding:1px 8px; font-size:11px;}
       .week-bar .wk-total{margin-left:auto; color:var(--sub); font-weight:700; font-size:12px;}
-      .r-stats{text-align:center; font-weight:800; font-size:13.5px; color:var(--accent); min-height:20px; margin-top:2px;}
-      .r-stats:empty{min-height:20px;}
+      .r-card{background:var(--card); border:2.5px solid var(--amber); border-radius:18px; box-shadow:0 3px 10px rgba(160,110,30,.13); padding:14px 16px 10px; margin-top:10px; flex:none;}
+      .r-stats{margin-top:2px;}
+      .r-stats:empty{display:none;}
+      .r-grow{display:flex; justify-content:space-between; align-items:center; padding:7px 2px; border-bottom:1.5px dashed var(--line); font-size:15px; font-weight:700;}
+      .r-grow:last-child{border-bottom:none;}
+      .r-week{display:none; justify-content:space-between; align-items:center; font-size:15px; font-weight:800; margin:12px 2px 0; flex:none;}
       .d-main{flex:1 1 auto; min-height:0; overflow-y:auto; padding:4px 0 10px;}
       .d-struct{background:var(--tile); border:2px solid var(--line); border-radius:16px; height:200px; display:flex; align-items:center; justify-content:center; padding:14px; margin-bottom:10px;}
       .d-struct img{max-width:100%; max-height:100%; object-fit:contain;}
       .d-name{font-size:clamp(20px, 6vw, 26px); font-weight:900; line-height:1.3; word-break:normal; overflow-wrap:anywhere;}
       .d-meta{font-size:14px; color:var(--sub); font-weight:700; line-height:1.7;}
+      .d-3d{display:inline-block; border:1.5px solid var(--sub); border-radius:999px; padding:1px 10px; font-size:12.5px; font-weight:800; color:var(--ink); text-decoration:none; margin-left:6px; vertical-align:2px;}
       .d-props{background:var(--card); border:2px solid var(--line); border-radius:14px; padding:12px 14px; font-size:15.5px; line-height:1.7; font-weight:600; margin-top:8px;}
+      #scr-detail.is-mastered .d-struct{border-color:var(--amber); box-shadow:0 0 0 3px rgba(245,166,35,.22);}
+      .d-progress{background:var(--card); border:2px solid var(--line); border-radius:14px; padding:8px 14px; margin-top:8px;}
+      .d-progress.is-mastered{border-color:var(--amber); background:var(--good-bg);}
+      .dp-row{display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:15px; font-weight:700;}
+      .dp-row + .dp-row{border-top:1.5px dashed var(--line);}
+      .dp-info{flex:none; width:20px; height:20px; margin-left:8px; border-radius:50%; border:2px solid var(--sub); background:transparent; color:var(--sub); font-size:12px; font-weight:900; line-height:1; padding:0; cursor:pointer;}
+      .dp-row b{margin-left:auto;}
+      .dp-help{font-size:13px; font-weight:600; color:var(--sub); line-height:1.7; padding:6px 0 4px;}
+      .ri-card{background:var(--card); border:2.5px solid var(--amber); border-radius:18px; box-shadow:0 3px 10px rgba(160,110,30,.13); padding:10px 16px; margin-top:12px;}
+      .ri-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; font-size:16px; font-weight:700;}
+      .ri-row + .ri-row{border-top:1.5px dashed var(--line);}
+      .ri-note{font-size:13.5px; font-weight:600; color:var(--sub); line-height:1.7; margin-top:12px; padding:0 4px;}
+      .ri-start{margin-top:16px;}
+      .ri-start:disabled{background:var(--chip); color:var(--sub); box-shadow:none;}
       /* ---------- RESULTS ---------- */
       #scr-result{overflow:hidden;}
-      .r-score{text-align:center; margin:8px 0 2px;}
-      .r-score .num{font-size:52px; font-weight:900; line-height:1.1;}
+      .r-score{text-align:center; margin:2px 0 4px;}
+      .r-score .num{font-size:52px; font-weight:900; line-height:1.1; color:#E07B2A;}
       .r-score .num span{font-size:24px; color:var(--sub);}
-      .r-combo{text-align:center; color:var(--accent); font-weight:800; font-size:14px; min-height:20px;}
-      .r-miss-label{font-size:12px; font-weight:700; color:var(--sub); margin:10px 2px 5px;}
+      .r-score .num #r-num, .r-score .num #r-den{font-size:52px; color:#E07B2A;}
+      .r-combo{display:none; justify-content:space-between; align-items:center; padding:7px 2px; border-bottom:1.5px dashed var(--line); font-size:15px; font-weight:700;}
+      .r-miss-label{font-size:14px; font-weight:800; color:var(--ink); margin:14px 2px 5px;}
+      .r-miss .row{text-align:left; width:100%; cursor:pointer;}
+      .r-miss .row .r-miss-arw{margin-left:auto; color:var(--sub); font-weight:900; font-size:17px;}
       .r-miss{flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:6px;}
       .r-miss .row{
         display:flex; align-items:center; gap:10px; background:var(--card); border:2px solid var(--line);
@@ -522,9 +554,9 @@
       .r-miss .row .tile{background:var(--tile); border:1.5px solid var(--line); border-radius:8px; width:52px; height:38px; flex:none; display:flex; align-items:center; justify-content:center; padding:3px;}
       .r-miss .row img{max-width:100%; max-height:100%; object-fit:contain;}
       .r-miss .none{color:var(--sub); font-weight:600; text-align:center; padding:14px 0;}
-      .r-btns{flex:none; display:grid; grid-template-columns:1fr 1fr; gap:8px; padding-top:10px;}
-      .r-btns button{min-height:50px; border-radius:14px; font-weight:800; font-size:15px; background:var(--chip);}
-      .r-btns button.primary{background:var(--accent); color:var(--accent-ink); grid-column:1 / -1;}
+      .r-btns{flex:none; display:grid; grid-template-columns:1fr 1fr; gap:8px; padding-top:12px;}
+      .r-btns button{min-height:50px; border-radius:14px; font-weight:800; font-size:15px; background:var(--card); border:2px solid var(--line);}
+      .r-btns button.primary{background:var(--primary); color:var(--primary-ink); grid-column:1 / -1;}
       .r-btns button.wide{grid-column:1 / -1;}
 
       /* ---------- HOME grouping (pairing integration tidy-up) ---------- */
@@ -540,7 +572,7 @@
       .p-prog{margin-left:auto; font-weight:800; font-size:14px; color:var(--sub); white-space:nowrap;}
       .p-prog b{color:var(--accent); font-size:16px;}
       /* start screen */
-      .p-start-wrap{flex:1 1 auto; display:flex; flex-direction:column; justify-content:center; gap:14px; max-width:440px; width:100%; margin:0 auto;}
+      .p-start-wrap{flex:1 1 auto; display:flex; flex-direction:column; justify-content:flex-start; gap:14px; max-width:440px; width:100%; margin:0 auto; padding-top:10px;}
       .p-cats{display:flex; gap:10px;}
       .p-cat{
         flex:1; min-height:58px; border-radius:14px; background:var(--card); border:2.5px solid var(--line);
@@ -553,10 +585,11 @@
         font-size:12px; font-weight:900; line-height:1;
       }
       .p-cat .cnt{font-size:12px; font-weight:800; color:var(--sub);}
-      .p-cat.on{border-color:var(--amber); background:var(--chip-on); color:var(--ink);}
-      .p-cat.on .u-check{background:var(--amber); border-color:var(--amber); color:#3B2A05;}
+      .p-cat.on{border-color:var(--amber); background:var(--chip-on); color:var(--on-ink);}
+      .p-cat.on .cnt{color:var(--sub);}
+      .p-cat.on .u-check{background:var(--amber); border-color:var(--amber); color:#44403C;}
       .p-start-btn{
-        width:100%; min-height:58px; border-radius:16px; background:var(--accent); color:var(--accent-ink);
+        width:100%; min-height:58px; border-radius:16px; background:var(--primary); color:var(--primary-ink);
         font-size:19px; font-weight:800; box-shadow:var(--shadow); letter-spacing:.04em;
       }
       .p-start-btn:active{transform:scale(.985);}
@@ -564,6 +597,15 @@
       /* start screen segmented controls (sub-mode / session length):
          no text labels anywhere — controls and toggles only */
       #ps-seg-sub button, #ps-seg-count button{min-height:48px; font-size:15px; font-weight:800;}
+      .p-howto{background:var(--card); border:2px solid var(--line); border-radius:14px; padding:10px 12px;}
+      .p-howto-grid{display:grid; grid-template-columns:1fr 1fr; gap:5px;}
+      .p-howto-grid .ht{background:var(--tile); border:1.5px solid var(--line); border-radius:8px; height:34px; display:flex; align-items:center; justify-content:center; padding:3px;}
+      .p-howto-grid .ht img{max-height:100%; max-width:80%; object-fit:contain;}
+      .p-howto-bottom{display:flex; gap:6px; margin-top:6px;}
+      .p-howto-names{flex:1; display:flex; flex-direction:column; gap:5px;}
+      .p-howto-names .hn{background:var(--chip); border:1.5px solid var(--line); border-radius:7px; height:16px;}
+      .p-howto-confirm{flex:none; width:24px; border-radius:7px; background:var(--primary); color:var(--primary-ink); font-weight:900; font-size:11px; display:flex; align-items:center; justify-content:center; writing-mode:vertical-rl; letter-spacing:.2em;}
+      .p-howto-cap{font-size:13px; font-weight:700; color:var(--sub); text-align:center; margin-top:8px;}
       .p-start-msg{border:2px dashed var(--amber); background:var(--chip); color:var(--accent);
         border-radius:14px; padding:12px 14px; font-size:14.5px; font-weight:700; line-height:1.55; text-align:center; margin:0;}
       /* question board */
@@ -654,7 +696,7 @@
       .p-board-res{flex:none; display:flex; align-items:center; justify-content:center; gap:9px;}
       .p-board-chip{width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:900; line-height:1; border:2px solid var(--line); background:var(--chip); color:var(--sub);}
       .p-board-chip.m-first{border-color:var(--good-border); background:#F9ECCB; color:var(--good);}
-      .p-board-chip.m-retry{border-color:var(--amber); background:var(--chip-on); color:var(--accent);}
+      .p-board-chip.m-retry{border-color:var(--amber); background:var(--amber); color:#44403C;}
       .p-board-txt{font-size:13.5px; font-weight:800; color:var(--sub); letter-spacing:.05em;}
       /* two-pair BOOST area: both targets stacked; measured fallback line */
       #pf-boost{display:flex; flex-direction:column; gap:6px;}
@@ -710,7 +752,7 @@
       .p-res-tally b{color:var(--accent); font-size:17px;}
       .p-mark{width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:900; border:2px solid var(--line); background:var(--chip); color:var(--sub);}
       .p-mark.m-first{border-color:var(--good-border); background:#F9ECCB; color:var(--good);}
-      .p-mark.m-retry{border-color:var(--amber); background:var(--chip-on); color:var(--accent);}
+      .p-mark.m-retry{border-color:var(--amber); background:var(--amber); color:#44403C;}
       .p-res-legend{margin-top:12px; font-size:12px; font-weight:700; color:var(--sub); line-height:1.6;}
       .p-res-again{width:100%; min-height:54px; border-radius:14px; background:var(--accent); color:var(--accent-ink); font-size:17px; font-weight:800; box-shadow:var(--shadow);}
       .p-res-home{width:100%; min-height:52px; border-radius:14px; background:var(--card); border:2px solid var(--line); color:var(--sub); font-size:16px; font-weight:800; box-shadow:var(--shadow);}
@@ -784,14 +826,18 @@
         </div>
       </div>
 
+      <p class="dir-note" id="dir-note" hidden></p>
+
       <div class="week-bar" id="week-bar" aria-label="週間目標">
         <span class="wk-label">今週</span>
         <span class="week-dots" id="week-dots"><i></i><i></i><i></i></span>
         <span id="week-text">0/3 セット</span>
         <span class="wk-done" id="week-done" hidden>達成</span>
         <span class="wk-total" id="week-total">累計 0 セット</span>
+        <button type="button" class="wk-info" id="week-info-btn" aria-expanded="false" aria-label="セットの説明">i</button>
       </div>
 
+      <p class="wk-note" id="week-note" hidden>1セット＝ラッシュを1回、最後まで終えること（四択・見比べは10問、ペアリングは1回分）。苦手復習とリベンジは数えません。</p>
       <p class="home-notice" id="home-notice" role="alert" hidden></p>
       <button type="button" class="start-btn" id="start-btn">スタート</button>
       <button type="button" class="zukan-btn" id="zukan-btn">図鑑</button>
@@ -818,6 +864,19 @@
         </div>
         <p class="p-start-msg" id="ps-msg" hidden></p>
         <button type="button" class="p-start-btn" id="ps-start">スタート</button>
+        <div class="p-howto" aria-hidden="true">
+          <div class="p-howto-grid">
+            <div class="ht"><img src="assets/structures/ethanol.svg" alt=""></div>
+            <div class="ht"><img src="assets/structures/benzene.svg" alt=""></div>
+            <div class="ht"><img src="assets/structures/acetone.svg" alt=""></div>
+            <div class="ht"><img src="assets/structures/toluene.svg" alt=""></div>
+          </div>
+          <div class="p-howto-bottom">
+            <div class="p-howto-names"><div class="hn"></div><div class="hn"></div><div class="hn"></div><div class="hn"></div></div>
+            <div class="p-howto-confirm">確定</div>
+          </div>
+          <p class="p-howto-cap">構造式と名前のペアを選んで、「確定」を押そう</p>
+        </div>
       </div>
     </section>
 
@@ -870,6 +929,22 @@
       <div class="fx-layer" id="fx-pair-res" aria-hidden="true"></div>
     </section>
 
+    <!-- REVIEW INFO -->
+    <section class="screen" id="scr-review-info">
+      <div class="p-head">
+        <button type="button" class="q-back" id="ri-back" aria-label="ホームへ戻る">←</button>
+        <div class="p-title">苦手復習</div>
+      </div>
+      <div class="ri-card">
+        <div class="ri-row"><span>まちがえた化合物</span><b id="ri-weak">0 種類</b></div>
+        <div class="ri-row"><span>今日の復習対象</span><b id="ri-due">0 種類</b></div>
+        <div class="ri-row"><span>次の復習予定（明日）</span><b id="ri-tomorrow">0 種類</b></div>
+      </div>
+      <p class="ri-note">期限が来た化合物は、通常の四択でも出題されやすくなります。</p>
+      <p class="ri-note" id="ri-empty" hidden>いま復習する苦手な化合物はありません。</p>
+      <button type="button" class="start-btn ri-start" id="ri-start">苦手復習をはじめる</button>
+    </section>
+
     <!-- QUIZ -->
     <section class="screen" id="scr-quiz" aria-live="off">
       <div class="q-head">
@@ -896,17 +971,20 @@
 
     <!-- RESULT -->
     <section class="screen" id="scr-result">
-      <div class="r-score"><div class="num"><span id="r-num">0</span><span> / </span><span id="r-den">10</span></div></div>
-      <div class="r-combo" id="r-combo"></div>
-      <div class="r-stats" id="r-stats"></div>
-      <p class="r-miss-label" id="r-miss-label">まちがえた化合物</p>
-      <div class="r-miss" id="r-miss"></div>
+      <div class="r-card">
+        <div class="r-score"><div class="num"><span id="r-num">0</span><span> / </span><span id="r-den">10</span></div></div>
+        <div class="r-combo" id="r-combo"></div>
+        <div class="r-stats" id="r-stats"></div>
+      </div>
+      <div class="r-week" id="r-week"></div>
       <div class="r-btns">
         <button type="button" class="primary" id="r-revenge" hidden>あと1問リベンジ</button>
         <button type="button" id="r-review">苦手復習</button>
         <button type="button" id="r-again">もう10問</button>
         <button type="button" class="wide" id="r-home">ホーム</button>
       </div>
+      <p class="r-miss-label" id="r-miss-label">まちがえた化合物</p>
+      <div class="r-miss" id="r-miss"></div>
       <div class="fx-layer" id="fx-result" aria-hidden="true"></div>
     </section>
 
@@ -926,9 +1004,8 @@
           <button type="button" data-zrange="skel:芳香族" aria-pressed="false">芳香族</button>
         </div>
         <div class="chips" id="z-state-chips" aria-label="学習状態">
-          <button type="button" data-state="met" aria-pressed="false">未発見</button>
-          <button type="button" data-state="seen" aria-pressed="false">出会った</button>
-          <button type="button" data-state="correct" aria-label="正解（未習得）" aria-pressed="false">正解</button>
+          <button type="button" data-state="met" aria-pressed="false">未練習</button>
+          <button type="button" data-state="practice" aria-pressed="false">練習中</button>
           <button type="button" data-state="mastered" aria-pressed="false">習得</button>
           <button type="button" id="z-review-toggle" aria-label="要復習のみ" aria-pressed="false">要復習</button>
         </div>
@@ -937,6 +1014,7 @@
         </button>
         <div class="fg-panel" id="z-fg-panel" hidden>
           <div class="fg-chips" id="z-fg-chips"></div>
+          <p class="fg-note">1つの化合物が複数の官能基に数えられるため、件数の合計は全化合物数（121種類）より多くなります。</p>
         </div>
       </div>
       <div class="z-grid" id="z-grid"></div>
@@ -1033,6 +1111,11 @@ segWire("diff-seg", "diff", (b, v) => { home.diff = v; document.querySelectorAll
 /* 見比べ / 苦手だけ復習 are A/B only: C and D chips are shown disabled there. */
 function refreshDirAvailability() {
   const na = home.mode !== "normal";
+  const dn = $("#dir-note");
+  if (dn) {
+    dn.hidden = !na;
+    if (na) dn.textContent = home.mode === "versus" ? "見比べでは、性質→名前／性質→構造式は選べません" : "苦手復習では、性質→名前／性質→構造式は選べません";
+  }
   document.querySelectorAll("#dir-seg button").forEach(b => {
     const isCD = b.dataset.dir === "C" || b.dataset.dir === "D";
     b.classList.toggle("mode-na", isCD && na);
@@ -1112,6 +1195,11 @@ function refreshWeekly() {
 }
 refreshReviewBadge();
 refreshWeekly();
+$("#week-info-btn").addEventListener("click", () => {
+  const note = $("#week-note"); const open = note.hidden;
+  note.hidden = !open;
+  $("#week-info-btn").setAttribute("aria-expanded", String(open));
+});
 refreshDirAvailability();
 
 function rangePool() {
@@ -1330,7 +1418,7 @@ function buildSession() {
 
 /* ---------- quiz runtime ---------- */
 let session = null, qIndex = 0, answered = false, combo = 0, bestCombo = 0, score = 0, misses = [], lastResult = null, isRevenge = false;
-let sessionNewEver = 0, sessionNewMastered = 0;
+let sessionNewEver = 0, sessionNewMastered = 0, sessionRecovered = 0;
 
 /* ---------- Phase 4 FX (display only) ----------
    Every trigger below is a one-off comparison of the answer record before
@@ -1443,6 +1531,7 @@ function recordAnswer(q, correct) {
   const mode = session ? session.mode : "normal";
   const revenge = isRevenge || mode === "revenge";
   if (correct) {
+    if (!revenge && (r.needsReview || (r.missLevel || 0) > 0)) sessionRecovered++;
     /* Revenge never touches the permanent record: everCorrect is the zukan
        CHEM BOOST! unlock, so it is set only by normal / versus / review play. */
     if (!revenge) r.everCorrect = true;
@@ -1493,7 +1582,7 @@ function refreshModeChip() {
 }
 function startSession(revengeTarget) {
   combo = 0; bestCombo = 0; score = 0; misses = []; qIndex = 0;
-  sessionNewEver = 0; sessionNewMastered = 0;
+  sessionNewEver = 0; sessionNewMastered = 0; sessionRecovered = 0;
   if (revengeTarget) {
     isRevenge = true;
     const pool = rangePool().length >= 4 ? rangePool() : DATA.compounds;
@@ -1557,10 +1646,14 @@ function renderQuestion() {
     const g = q.target.functionalGroups[0];
     hint = g ? g + "に注目" : "炭素の骨格に注目";
   }
+  const versusPrompt = session.mode === "versus"
+    ? '<div class="q-prompt">' + (q.dir === "A" ? "「" + q.target.nameJa + "」はどっち？" : "この構造式の名前はどっち？") + "</div>"
+      + (qIndex === 0 ? '<div class="q-prompt-sub">2つを見比べて、正しい方をえらぼう</div>' : "")
+    : "";
   if (q.dir === "A") {
-    main.innerHTML = '<div class="q-name">' + q.target.nameJa + '</div><div class="q-formula">' + formulaHtml(q.target.formula) + '</div><div class="q-hint' + (hint ? " show" : "") + '">' + hint + '</div>';
+    main.innerHTML = versusPrompt + '<div class="q-name">' + q.target.nameJa + '</div><div class="q-formula">' + formulaHtml(q.target.formula) + '</div><div class="q-hint' + (hint ? " show" : "") + '">' + hint + '</div>';
   } else if (q.dir === "B") {
-    main.innerHTML = '<div class="q-struct">' + structImg(q.target) + '</div><div class="q-hint' + (hint ? " show" : "") + '">' + hint + '</div>';
+    main.innerHTML = versusPrompt + '<div class="q-struct">' + structImg(q.target) + '</div><div class="q-hint' + (hint ? " show" : "") + '">' + hint + '</div>';
   } else {
     main.innerHTML = '<div class="q-props">' + q.target.properties + '</div>';
   }
@@ -2096,6 +2189,16 @@ function storyHtml(s) {
     + '<p class="story-name">' + s.title + '</p>'
     + s.body.map(p => '<p class="story-body">' + p + '</p>').join("") + "</div>";
 }
+function mergedLockHtml(hasBoost, hasStory) {
+  const title = hasBoost && hasStory ? "CHEM BOOST! \uff06 STORY" : hasBoost ? "CHEM BOOST!" : "CHEM STORY";
+  const text = hasBoost && hasStory
+    ? "\u521d\u3081\u3066\u6b63\u89e3\u3059\u308b\u3068\u3001\u767a\u5c55\u77e5\u8b58\u3068\u5316\u5b66\u306e\u7269\u8a9e\u304c\u958b\u304d\u307e\u3059"
+    : hasBoost
+      ? "\u521d\u3081\u3066\u6b63\u89e3\u3059\u308b\u3068\u3001\u767a\u5c55\u77e5\u8b58\u304c\u958b\u304d\u307e\u3059"
+      : "\u521d\u3081\u3066\u6b63\u89e3\u3059\u308b\u3068\u3001\u5316\u5b66\u306e\u7269\u8a9e\u304c\u958b\u304d\u307e\u3059";
+  return '<div class="boost locked d-boost"><div class="boost-head">' + LOCK_SVG + '<span class="boost-title">' + title + '</span></div>'
+    + '<p class="boost-locked-text">' + text + '</p></div>';
+}
 function storyLockedHtml() {
   return '<div class="story locked"><div class="story-head">' + LOCK_SVG + '<span class="story-title">CHEM STORY 未解放</span></div>'
     + '<p class="story-locked-text">この化合物のクイズに正解すると、読み物が読めるようになります</p></div>';
@@ -2189,7 +2292,7 @@ $("#next-btn").addEventListener("click", () => {
       saveStore();
       refreshWeekly();
     }
-    lastResult = { score, total: session.questions.length, bestCombo, misses: misses.slice(), mode: session.mode, newEver: sessionNewEver, newMastered: sessionNewMastered, sessionId: session.id, revengeUsed: !!session.revengeUsed, intro: !!session.intro };
+    lastResult = { score, total: session.questions.length, bestCombo, misses: misses.slice(), mode: session.mode, newEver: sessionNewEver, newMastered: sessionNewMastered, recovered: sessionRecovered, sessionId: session.id, revengeUsed: !!session.revengeUsed, intro: !!session.intro };
     renderResult(lastResult);
     show("scr-result");
   }
@@ -2242,18 +2345,33 @@ function renderResult(r) {
     confettiDone.add(r.sessionId);
     fireConfetti();
   }
-  $("#r-combo").textContent = r.bestCombo >= 2 ? "最高コンボ " + r.bestCombo : "";
-  const stats = [];
-  if (r.newEver) stats.push("新たに初正解 " + r.newEver + "件");
-  if (r.newMastered) stats.push("新たに習得 " + r.newMastered + "件");
-  const rs = $("#r-stats"); if (rs) rs.textContent = stats.join("　・　");
+  const comboEl = $("#r-combo");
+  if (r.bestCombo >= 2) { comboEl.innerHTML = "<span>最高コンボ</span><b>" + r.bestCombo + "</b>"; comboEl.style.display = "flex"; }
+  else comboEl.style.display = "none";
+  const grows = [];
+  if (r.newEver) grows.push(["初めて正解", r.newEver]);
+  if (r.newMastered) grows.push(["新しく習得", r.newMastered]);
+  if (r.recovered) grows.push(["前に間違えた化合物にも正解", r.recovered]);
+  const rs = $("#r-stats");
+  if (rs) rs.innerHTML = grows.map(g => '<div class="r-grow"><span>' + g[0] + "</span><b>" + g[1] + "</b></div>").join("");
+  const wk = $("#r-week");
+  if (wk) {
+    const counted = (r.mode === "normal" || r.mode === "versus") && !fromRevenge;
+    if (counted) {
+      const wn = Math.min((store.weeklyCounts && store.weeklyCounts[mondayKey()]) || 0, 3);
+      wk.innerHTML = "<span>今週の目標</span><b>" + wn + " / 3 セット</b>";
+      wk.style.display = "flex";
+    } else wk.style.display = "none";
+  }
   const box = $("#r-miss");
   box.innerHTML = "";
   $("#r-miss-label").style.visibility = r.misses.length ? "visible" : "hidden";
+  if (r.misses.length) $("#r-miss-label").textContent = "まちがえた化合物 " + r.misses.length;
   if (!r.misses.length) box.innerHTML = '<div class="none">全問正解！</div>';
   r.misses.forEach(c => {
-    const row = document.createElement("div"); row.className = "row";
-    row.innerHTML = '<div class="tile">' + structImg(c) + '</div><div>' + c.nameJa + '</div>';
+    const row = document.createElement("button"); row.type = "button"; row.className = "row";
+    row.innerHTML = '<div class="tile">' + structImg(c) + '</div><div>' + c.nameJa + '</div><span class="r-miss-arw">›</span>';
+    row.addEventListener("click", () => openDetail(c.id));
     box.appendChild(row);
   });
   $("#r-revenge").hidden = !r.misses.length || !!r.revengeUsed;
@@ -2270,15 +2388,33 @@ $("#r-revenge").addEventListener("click", () => {
   const t = lastResult.misses[Math.floor(Math.random() * lastResult.misses.length)];
   startSession(t);
 });
-$("#r-review").addEventListener("click", () => {
+$("#r-review").addEventListener("click", () => { openReviewInfo(); });
+$("#r-again").addEventListener("click", () => startSession());
+$("#r-home").addEventListener("click", () => { show("scr-home"); refreshReviewBadge(); refreshWeekly(); });
+$("#start-btn").addEventListener("click", () => { if (home.mode === "review") { openReviewInfo(); return; } startSession(); });
+
+/* ---------- review info ---------- */
+function openReviewInfo() {
+  const pool = rangePool();
+  const today = todayLocal();
+  const tomorrow = addDaysStr(today, 1);
+  const weak = pool.filter(c => recOf(c.id).needsReview).length;
+  const due = pool.filter(c => { const d = recOf(c.id).nextReviewDate; return d && d <= today && (recOf(c.id).reviewStage || 0) > 0; }).length;
+  const tmr = pool.filter(c => recOf(c.id).nextReviewDate === tomorrow).length;
+  $("#ri-weak").textContent = weak + " \u7a2e\u985e";
+  $("#ri-due").textContent = due + " \u7a2e\u985e";
+  $("#ri-tomorrow").textContent = tmr + " \u7a2e\u985e";
+  $("#ri-empty").hidden = weak !== 0;
+  $("#ri-start").disabled = weak === 0;
+  show("scr-review-info");
+}
+$("#ri-back").addEventListener("click", () => { show("scr-home"); refreshReviewBadge(); refreshWeekly(); });
+$("#ri-start").addEventListener("click", () => {
   home.mode = "review";
   document.querySelectorAll("#mode-seg button").forEach(x => x.classList.toggle("on", x.dataset.mode === "review"));
   refreshDirAvailability(); refreshReviewBadge();
   startSession();
 });
-$("#r-again").addEventListener("click", () => startSession());
-$("#r-home").addEventListener("click", () => { show("scr-home"); refreshReviewBadge(); refreshWeekly(); });
-$("#start-btn").addEventListener("click", () => { startSession(); });
 
 /* ---------- zukan ---------- */
 /* No selection means all; selections within each group are OR, groups are AND. */
@@ -2291,10 +2427,9 @@ function stateChips(c) {
      order is a no-op for them — but a pairing first-attempt correct sets
      everCorrect alone (its dedicated write path touches nothing else),
      and the zukan must still show the correct-experience chip for it. */
-  if (r && r.mastered) chips.push({ label: "\u7fd2\u5f97\u3057\u305f", cls: "mastered" });
-  else if (r && r.everCorrect) chips.push({ label: "\u6b63\u89e3\u3057\u305f", cls: "correct" });
-  else if (!r || !r.seen) chips.push({ label: "\u672a\u767a\u898b", cls: "met" });
-  else chips.push({ label: "\u51fa\u4f1a\u3063\u305f", cls: "seen" });
+  if (r && r.mastered) chips.push({ label: "\u7fd2\u5f97", cls: "mastered" });
+  else if (!r || (!r.seen && !r.everCorrect)) chips.push({ label: "\u672a\u7df4\u7fd2", cls: "met" });
+  else chips.push({ label: "\u7df4\u7fd2\u4e2d", cls: "practice" });
   if (r && r.needsReview) chips.push({ label: "\u8981\u5fa9\u7fd2", cls: "review" });
   return chips;
 }
@@ -2326,27 +2461,54 @@ function renderZukan() {
     grid.appendChild(b);
   });
 }
+/* StereoMolecule 3D link: starter set only (PubChem 3D records verified
+   2026-11-15). Shown on mastered compounds, opens in a new tab. */
+const SM3D_IDS = new Set(["methanol", "ethanol", "acetic-acid", "ethyl-acetate", "acetone", "benzene", "toluene", "phenol", "aniline", "glucose"]);
 function openDetail(id) {
   const c = byId[id]; if (!c) return;
   const fg = c.functionalGroups.length ? c.functionalGroups.join("\u3001") : "\u306a\u3057";
   const note = boostNote(id);
-  /* CHEM BOOST! unlocks permanently once the compound has ever been answered
-     correctly (everCorrect); independent of mastery. Locked: condition only. */
-  const boostSection = !note ? "" : recOf(id).everCorrect
-    ? boostHtml(note, false).replace('class="boost"', 'class="boost d-boost"')
-    : boostLockedHtml();
-  /* CHEM STORY: same everCorrect unlock as CHEM BOOST!; the frame renders
-     only for compounds that have a story entry (locked shows no title/body). */
   const story = storyNote(id);
-  const storySection = !story ? "" : recOf(id).everCorrect
-    ? storyHtml(story)
-    : storyLockedHtml();
+  const rec = recOf(id);
+  /* CHEM BOOST! / CHEM STORY unlock permanently once the compound has ever
+     been answered correctly (everCorrect); independent of mastery.
+     Locked in the zukan detail: one merged frame (title/body stay hidden). */
+  let boostSection = "", storySection = "";
+  if (!rec.everCorrect && (note || story)) {
+    boostSection = mergedLockHtml(!!note, !!story);
+  } else {
+    boostSection = !note ? "" : boostHtml(note, false).replace('class="boost"', 'class="boost d-boost"');
+    storySection = !story ? "" : storyHtml(story);
+  }
+  /* Mastery progress: display only, derived from the existing record. */
+  let progressHtml = "";
+  if (rec.mastered) {
+    progressHtml = '<div class="d-progress is-mastered"><div class="dp-row"><span>\u7fd2\u5f97\u6e08\u307f</span><b>\u56db\u629e\u306e\u6761\u4ef6\u3092\u9054\u6210</b></div></div>';
+  } else {
+    const cnt = Math.min(rec.fourChoiceSuccessCount || 0, 2);
+    const dirOk = !!rec.hasStructureFourChoiceCorrect;
+    progressHtml = '<div class="d-progress">'
+      + '<div class="dp-row"><span>\u7fd2\u5f97\u9032\u6357</span><b>' + cnt + ' / 2</b><button type="button" class="dp-info" id="d-progress-info" aria-expanded="false" aria-label="\u7fd2\u5f97\u306e\u6761\u4ef6">i</button></div>'
+      + '<div class="dp-row"><span>\u540d\u524d\u21d4\u69cb\u9020\u5f0f\u3067\u6b63\u89e3</span><b>' + (dirOk ? "\u30af\u30ea\u30a2" : "\u307e\u3060") + '</b></div>'
+      + '<p class="dp-help" id="d-progress-help" hidden>\u56db\u629e\u30e9\u30c3\u30b7\u30e5\u3067\u3001\u5225\u306e\u30bb\u30c3\u30c8\u30672\u56de\u6b63\u89e3\u3057\u3001\u305d\u306e\u3046\u30611\u56de\u306f\u300c\u540d\u524d\u2192\u69cb\u9020\u5f0f\u300d\u304b\u300c\u69cb\u9020\u5f0f\u2192\u540d\u524d\u300d\u306e\u554f\u984c\u3067\u6b63\u89e3\u3059\u308b\u3068\u7fd2\u5f97\u3067\u3059\u3002</p>'
+      + '</div>';
+  }
   $("#d-main").innerHTML = '<div class="d-struct">' + structImg(c) + '</div>'
     + '<div class="d-name">' + c.nameJa + "</div>"
-    + '<div class="d-meta">' + formulaHtml(c.formula) + " / " + c.skeletonCategory + "<br>\u5b98\u80fd\u57fa\uff1a" + fg + "<br>\u72b6\u614b\uff1a" + stateText(c) + "</div>"
+    + '<div class="d-meta">' + formulaHtml(c.formula) + " / " + c.skeletonCategory
+    + (rec.mastered && SM3D_IDS.has(id) ? ' <a class="d-3d" href="https://koichem.github.io/StereoMolecule/?name=' + encodeURIComponent(id) + '" target="_blank" rel="noopener">3D\u3067\u898b\u308b</a>' : "")
+    + "<br>\u5b98\u80fd\u57fa\uff1a" + fg + "<br>\u72b6\u614b\uff1a" + stateText(c) + "</div>"
+    + progressHtml
     + '<div class="d-props">' + c.properties + "</div>"
     + boostSection
     + storySection;
+  $("#scr-detail").classList.toggle("is-mastered", !!rec.mastered);
+  const dpBtn = $("#d-progress-info");
+  if (dpBtn) dpBtn.addEventListener("click", () => {
+    const help = $("#d-progress-help"); const open = help.hidden;
+    help.hidden = !open;
+    dpBtn.setAttribute("aria-expanded", String(open));
+  });
   show("scr-detail");
 }
 /* Functional groups can be combined; the panel stays open for multiple selections. */
