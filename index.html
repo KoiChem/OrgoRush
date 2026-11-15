@@ -461,6 +461,7 @@
         background:var(--chip); color:var(--ink); font-size:16px; font-weight:800; border:2px solid var(--line);
       }
       /* ---------- ZUKAN ---------- */
+      .z-recent-note{font-size:12.5px; font-weight:700; color:var(--sub); margin:8px 2px 0;}
       #scr-zukan, #scr-detail{overflow:hidden;}
       .z-head{flex:none; display:flex; align-items:center; gap:10px; height:46px;}
       .z-title{font-size:20px; font-weight:900; flex:1; white-space:nowrap;}
@@ -1005,6 +1006,7 @@
           <button type="button" data-state="practice" aria-pressed="false">練習中</button>
           <button type="button" data-state="mastered" aria-pressed="false">習得</button>
           <button type="button" id="z-review-toggle" aria-label="要復習のみ" aria-pressed="false">要復習</button>
+          <button type="button" id="z-recent-toggle" aria-label="最近正解のみ" aria-pressed="false">最近正解</button>
         </div>
         <button type="button" class="fg-toggle" id="z-fg-toggle" aria-expanded="false" aria-controls="z-fg-panel">
           <span id="z-fg-label">官能基：すべて</span><span class="fg-caret" aria-hidden="true">▾</span>
@@ -1014,6 +1016,7 @@
           <p class="fg-note">1つの化合物が複数の官能基に数えられるため、件数の合計は全化合物数（121種類）より多くなります。</p>
         </div>
       </div>
+      <p class="z-recent-note" id="z-recent-note" hidden></p>
       <div class="z-grid" id="z-grid"></div>
     </section>
 
@@ -1038,7 +1041,7 @@ const $ = s => document.querySelector(s);
 /* ---------- storage (orgorush:v1) Phase 3 schema ---------- */
 const ALLOW_UNAPPROVED_QUESTIONS = true;
 const LS_KEY = "orgorush:v1";
-function defaultRec() { return { seen: false, everCorrect: false, mastered: false, needsReview: false, missLevel: 0, reviewStage: 0, nextReviewDate: null, fourChoiceSuccessCount: 0, lastFourChoiceSuccessSessionId: null, hasStructureFourChoiceCorrect: false }; }
+function defaultRec() { return { seen: false, everCorrect: false, mastered: false, needsReview: false, missLevel: 0, reviewStage: 0, nextReviewDate: null, fourChoiceSuccessCount: 0, lastFourChoiceSuccessSessionId: null, hasStructureFourChoiceCorrect: false, lastCorrectDate: null }; }
 function normalizeRec(r) { const d = defaultRec(); if (r && typeof r === "object") { Object.keys(d).forEach(k => { if (r[k] !== undefined) d[k] = r[k]; }); } return d; }
 let store = { schemaVersion: 1, onboardingCompleted: false, totalCompletedSessions: 0, bestCombo: 0, weeklyCounts: {}, compounds: {} };
 function needsReviewIds() { return Object.keys(store.compounds).filter(id => store.compounds[id].needsReview); }
@@ -1531,7 +1534,7 @@ function recordAnswer(q, correct) {
     if (!revenge && (r.needsReview || (r.missLevel || 0) > 0)) sessionRecovered++;
     /* Revenge never touches the permanent record: everCorrect is the zukan
        CHEM BOOST! unlock, so it is set only by normal / versus / review play. */
-    if (!revenge) r.everCorrect = true;
+    if (!revenge) { r.everCorrect = true; r.lastCorrectDate = todayLocal(); }
     if (!revenge && !wasEver) sessionNewEver++;
     if (!revenge) {
       if (mode === "normal" || mode === "review" || mode === "versus") { r.needsReview = false; r.missLevel = 0; }
@@ -2415,7 +2418,7 @@ $("#ri-start").addEventListener("click", () => {
 
 /* ---------- zukan ---------- */
 /* No selection means all; selections within each group are OR, groups are AND. */
-const zukan = { skel: new Set(), fg: new Set(), state: new Set(), reviewOnly: false };
+const zukan = { skel: new Set(), fg: new Set(), state: new Set(), reviewOnly: false, recentOnly: false };
 function stateChips(c) {
   const r = store.compounds[c.id];
   let chips = [];
@@ -2437,6 +2440,11 @@ function zukanPool() {
   if (zukan.fg.size) pool = pool.filter(c => c.functionalGroups.some(g => zukan.fg.has(g)) || (!c.functionalGroups.length && zukan.fg.has("なし")));
   if (zukan.state.size) pool = pool.filter(c => stateChips(c).some(x => zukan.state.has(x.cls)));
   if (zukan.reviewOnly) pool = pool.filter(c => recOf(c.id).needsReview);
+  if (zukan.recentOnly) {
+    const today = todayLocal(), from = addDaysStr(today, -6);
+    pool = pool.filter(c => { const d = recOf(c.id).lastCorrectDate; return !!d && d >= from && d <= today; });
+    pool.sort((a, b) => (recOf(b.id).lastCorrectDate || "").localeCompare(recOf(a.id).lastCorrectDate || ""));
+  }
   return pool;
 }
 function renderZukan() {
@@ -2446,8 +2454,11 @@ function renderZukan() {
   const zm = $("#z-master-count"); if (zm) zm.textContent = "\u7fd2\u5f97 " + mastered + "/" + DATA.compounds.length;
   const grid = $("#z-grid"); grid.innerHTML = "";
   const pool = zukanPool();
+  const rNote = $("#z-recent-note");
+  if (rNote) { rNote.hidden = !zukan.recentOnly; if (zukan.recentOnly) rNote.textContent = "過去7日間の正解：" + pool.length + "種類（新しい順）"; }
   if (!pool.length) {
-    grid.innerHTML = '<div class="z-empty"><div role="status">該当する化合物はありません</div><button type="button">絞り込みを解除</button></div>';
+    const onlyRecent = zukan.recentOnly && !zukan.reviewOnly && !zukan.skel.size && !zukan.state.size && !zukan.fg.size;
+    grid.innerHTML = '<div class="z-empty"><div role="status">' + (onlyRecent ? "最近7日間の正解記録はありません" : "該当する化合物はありません") + '</div><button type="button">絞り込みを解除</button></div>';
     grid.querySelector("button").addEventListener("click", resetZukanFilters);
   }
   pool.forEach(c => {
@@ -2575,8 +2586,14 @@ $("#z-review-toggle").addEventListener("click", () => {
   $("#z-review-toggle").setAttribute("aria-pressed", String(zukan.reviewOnly));
   renderZukan();
 });
+$("#z-recent-toggle").addEventListener("click", () => {
+  zukan.recentOnly = !zukan.recentOnly;
+  $("#z-recent-toggle").classList.toggle("on", zukan.recentOnly);
+  $("#z-recent-toggle").setAttribute("aria-pressed", String(zukan.recentOnly));
+  renderZukan();
+});
 function resetZukanFilters() {
-  zukan.skel.clear(); zukan.state.clear(); zukan.fg.clear(); zukan.reviewOnly = false;
+  zukan.skel.clear(); zukan.state.clear(); zukan.fg.clear(); zukan.reviewOnly = false; zukan.recentOnly = false;
   document.querySelectorAll("#z-range-chips button, #z-state-chips button").forEach(b => {
     b.classList.remove("on");
     b.setAttribute("aria-pressed", "false");
@@ -2636,7 +2653,8 @@ function cleanupPairFx() {
    hasStructureFourChoiceCorrect, review / spaced-repetition state).
    Returns true only when this call flipped false -> true. */
 function pairMarkEverCorrect(id) {
-  if (recOf(id).everCorrect) return false;
+  ensureRec(id).lastCorrectDate = todayLocal();
+  if (recOf(id).everCorrect) { saveStore(); return false; }
   ensureRec(id).everCorrect = true;
   saveStore();
   return true;
