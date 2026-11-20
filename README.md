@@ -6,7 +6,7 @@
 
 ## 内容
 
-- 高校有機化学の **121化合物** が対象（データは [OrgoBingo](https://github.com/KoiChem/OrgoBingo) の化合物データを使用）
+- 高校有機化学の **122化合物** が対象（データは [OrgoBingo](https://github.com/KoiChem/OrgoBingo) の化合物データを使用）
 - モード
   - **四択ラッシュ**：構造式・名前・性質から答える10問クイズ
   - **見比べラッシュ**：まぎらわしい2つを見比べて選ぶ
